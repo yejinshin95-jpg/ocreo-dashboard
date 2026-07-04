@@ -21,15 +21,11 @@ channel = slack("conversations.open", users=USER)["channel"]["id"]
 # 최근 7일 메시지에서 가장 최신 'OCREO 주간 체크' 질문 찾기 (서식 기호 무관하게 느슨한 매칭)
 oldest = str(time.time() - 7 * 86400)
 history = slack("conversations.history", channel=channel, oldest=oldest, limit=200)["messages"]
-print(f"[debug] DM 채널 {channel}, 최근 7일 메시지 {len(history)}건")
-for m in history[:10]:
-    print(f"[debug] ts={m.get('ts')} user={m.get('user')} bot={m.get('bot_id')} text={m.get('text','')[:60]!r}")
 
 question = next((m for m in history if "OCREO 주간 체크" in m.get("text", "")), None)
 
 replies = []
 if question:
-    print(f"[debug] 질문 메시지 발견 ts={question['ts']} reply_count={question.get('reply_count')}")
     if question.get("reply_count"):
         thread = slack("conversations.replies", channel=channel, ts=question["ts"])["messages"][1:]
         replies += [m["text"] for m in thread if m.get("user") == USER]
@@ -39,7 +35,6 @@ else:
     # 예비 동작: 질문 메시지를 못 찾아도 최근 24시간 내 사용자의 DM 메시지가 있으면 답변으로 간주
     day_ago = time.time() - 86400
     replies = [m["text"] for m in history if m.get("user") == USER and float(m["ts"]) > day_ago]
-    print(f"[debug] 질문 메시지 미발견 → 24시간 내 사용자 메시지 {len(replies)}건을 답변으로 사용")
 
 if not replies:
     slack("chat.postMessage", channel=channel,
