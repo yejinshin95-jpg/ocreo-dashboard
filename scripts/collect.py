@@ -71,7 +71,7 @@ resp = client.messages.create(
 
 출력은 갱신된 <section id="briefing">...</section> HTML만, 다른 설명 없이."""}],
 )
-new_briefing = resp.content[0].text.strip()
+new_briefing = "".join(b.text for b in resp.content if getattr(b, "type", None) == "text").strip()
 m = re.search(r'<section id="briefing".*?</section>', new_briefing, re.S)
 if not m:
     raise SystemExit("Claude 응답에서 브리핑 섹션을 찾지 못했습니다.")
