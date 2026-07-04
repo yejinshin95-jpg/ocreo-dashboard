@@ -1,0 +1,1111 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OCREO 프로젝트 일정 한눈에 보기</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<!--
+  ⚠️ 디자인 시스템: 이 화면은 같은 폴더의 DESIGN.md ("OCREO Status") 를 따릅니다.
+  2색 체계 (블랙 + 블루): primary(파랑)=진행, alert(진한 남색)=최우선,
+  success(짙은 파랑)=완료·운영, event(블랙)=행사·오늘. 서체는 나눔스퀘어.
+-->
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        // DESIGN.md {colors.*} 토큰
+        primary: '#2563EB',
+        secondary: '#64748B',
+        ink: '#0F172A',
+        muted: '#94A3B8',
+        alert: '#1E3A8A',
+        success: '#1E40AF',
+        event: '#0F172A',
+      },
+      fontFamily: {
+        sans: ['NanumSquare', 'Noto Sans KR', 'sans-serif'], // DESIGN.md {typography.*}
+      },
+    },
+  },
+};
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://cdn.jsdelivr.net/gh/moonspam/NanumSquare@2.0/nanumsquare.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  /* ===== DESIGN.md 토큰 (기계가 읽는 기준값) ===== */
+  :root {
+    --color-primary: #2563EB;   /* 파랑 · 진행 */
+    --color-secondary: #64748B;
+    --color-neutral: #F1F5F9;
+    --color-surface: #FFFFFF;
+    --color-ink: #0F172A;       /* 블랙 · 제목 */
+    --color-muted: #94A3B8;
+    --color-alert: #1E3A8A;     /* 진한 남색 · 최우선 */
+    --color-success: #1E40AF;   /* 짙은 파랑 · 완료·운영 */
+    --color-event: #0F172A;     /* 블랙 · 행사·오늘 */
+    --rounded-sm: 8px;
+    --rounded-md: 12px;
+    --rounded-lg: 16px;
+    --spacing-xl: 24px;
+  }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'NanumSquare', 'Noto Sans KR', sans-serif; }
+  section[id] { scroll-margin-top: 24px; }
+  .gantt-bar { position: relative; transition: all .2s ease; cursor: pointer; }
+  .gantt-bar:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,.15); z-index: 20; }
+  .gantt-bar .tooltip {
+    visibility: hidden; opacity: 0; transition: opacity .2s;
+    position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%);
+    background: #1e293b; color: #fff; font-size: 12px; padding: 8px 12px; border-radius: 8px;
+    white-space: nowrap; z-index: 50; box-shadow: 0 4px 12px rgba(0,0,0,.25);
+  }
+  .gantt-bar .tooltip::after {
+    content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+    border: 6px solid transparent; border-top-color: #1e293b;
+  }
+  .gantt-bar:hover .tooltip { visibility: visible; opacity: 1; }
+  @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:.4} }
+  .pulse-dot { animation: pulse-dot 1.6s infinite; }
+  /* 사이드 메뉴 */
+  .nav-link { display:block; padding:6px 10px; border-radius:8px; font-size:12px; font-weight:600; color:#64748b; transition:all .15s; border-left:2px solid transparent; }
+  .nav-link:hover { background:#eff6ff; color:#1d4ed8; }
+  .nav-link.active { background:#eff6ff; color:#1d4ed8; border-left-color:#2563eb; }
+  .nav-sub { margin-left:14px; }
+  /* 어드민/홈페이지 보기 토글 */
+  .scope-btn { color:#64748b; }
+  .scope-btn.active { background:#2563eb; color:#fff; }
+  .nav-group { font-size:10px; font-weight:900; color:#94a3b8; letter-spacing:.08em; padding:12px 10px 4px; }
+  /* 캘린더 */
+  /* 캘린더 일간 칸: 라벨 유무와 관계없이 모든 달·모든 주에서 동일 크기 */
+  .cal-day { height:40px; }
+  details > summary { cursor: pointer; list-style-position: inside; }
+  .chip a { text-decoration: underline; text-underline-offset: 2px; text-decoration-color: currentColor; }
+  @media print {
+    aside { display:none !important; }
+    main section { display:block !important; }
+    #calRoot > div { display:block !important; }
+  }
+  /* 월별 일정표를 항상 맨 위에 표시 */
+  main { display:flex; flex-direction:column; }
+  main > header { order:-3; }
+  #briefing { order:-2; }
+  #timeline { order:-1; }
+</style>
+</head>
+<body class="bg-slate-100 text-slate-800 antialiased">
+
+<div class="max-w-[1400px] mx-auto px-4 lg:px-6 py-8">
+<div class="flex gap-6 items-start">
+
+  <!-- ============ 좌측 메뉴 ============ -->
+  <aside class="hidden lg:block w-56 shrink-0 sticky top-6">
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-3">
+      <div class="px-2 pt-2 pb-3 border-b border-slate-100 mb-1">
+        <p class="text-[10px] font-black text-blue-600 tracking-widest">OCREO</p>
+        <p class="text-sm font-black text-slate-900 leading-tight">프로젝트 일정<br>대시보드</p>
+        <p class="text-[10px] text-slate-400 mt-1">2026.07.04 기준</p>
+      </div>
+      <nav id="sideNav">
+        <p class="nav-group">일정</p>
+        <a class="nav-link" href="#timeline">📈 월별 일정표 (전체 흐름)</a>
+        <a class="nav-link" href="#calendar">🗓️ 월별 캘린더 (주차별)</a>
+        <div class="nav-sub">
+          <a class="nav-link" href="#cal-7">7월 · 21회차 행사</a>
+          <a class="nav-link" href="#cal-8">8월 · 집중 개발</a>
+          <a class="nav-link" href="#cal-9">9월 · 23회차 신청 시작</a>
+          <a class="nav-link" href="#cal-10">10월 · 타이페이</a>
+          <a class="nav-link" href="#cal-11">11월 · 부일페</a>
+          <a class="nav-link" href="#cal-12">12월 · 새 단장</a>
+        </div>
+        <p class="nav-group">한눈에 보기</p>
+        <a class="nav-link" href="#milestones">📅 꼭 기억할 주요 날짜</a>
+        <a class="nav-link" href="#summary">📊 핵심 요약 3가지</a>
+        <p class="nav-group">기획</p>
+        <a class="nav-link" href="#planning">📝 기획 일정</a>
+        <p class="nav-group">협의 사항</p>
+        <a class="nav-link" href="#decisions">📌 결정 사항 · 확인 요청</a>
+        <p class="nav-group">상세</p>
+        <a class="nav-link" href="#tasks">📋 할 일 상세 목록</a>
+      </nav>
+      <div class="border-t border-slate-100 mt-2 pt-2 px-1">
+        <button id="modeBtn" class="w-full text-[11px] font-bold text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg py-2 transition">🖨️ 전체 보기 (인쇄용)</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============ 본문 ============ -->
+  <main class="flex-1 min-w-0">
+
+  <!-- 상단 제목 -->
+  <header class="mb-8">
+    <div class="flex flex-wrap items-center justify-between gap-4">
+      <div>
+        <p class="text-sm font-medium text-blue-600 tracking-wide mb-1">2026년 7월 – 12월 계획</p>
+        <h1 class="text-3xl font-black text-slate-900">OCREO 프로젝트 일정 한눈에 보기</h1>
+        <p class="text-slate-500 mt-2">실장님 보고용 · 기획자가 정리한 진행 현황 · 2026년 7월 4일 (토) · 토스 공식 답변(6/26 메일) 반영</p>
+      </div>
+    </div>
+  </header>
+
+  <!-- 이번 주 브리핑 (일요일 저녁 진행 상황 확인 후 갱신되는 영역) -->
+  <section id="briefing" class="bg-white border border-slate-200 border-l-4 !border-l-blue-600 rounded-2xl shadow-sm p-5 mb-8">
+    <div class="flex items-center justify-between flex-wrap gap-2 mb-2">
+      <p class="text-sm font-black text-slate-900">📢 이번 주 브리핑</p>
+      <p class="text-[11px] text-slate-400">최종 업데이트: 7/4 (토) · 다음 갱신: 7/5 (일) 저녁 진행 상황 확인 후</p>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+      <div>
+        <p class="text-[11px] font-bold text-blue-700 mb-1">진행 중</p>
+        <p class="text-slate-600 leading-relaxed">페어 관리 기획(어드민) · 정산 관리 1단계 착수 준비(7/6 주) · 21회차 부스도면 최종 점검</p>
+      </div>
+      <div>
+        <p class="text-[11px] font-bold text-orange-700 mb-1">배포·공개 예정</p>
+        <p class="text-slate-600 leading-relaxed">7/5(일) 어드민 1차 배포 — 참가자 확정 현황 대시보드 포함 · 7/6(월) 부스도면 정식 공개 <span class="text-slate-400">(결과는 확인 후 이 영역에 반영)</span></p>
+      </div>
+      <div>
+        <p class="text-[11px] font-bold text-slate-600 mb-1">확인 대기</p>
+        <p class="text-slate-600 leading-relaxed">증빙 발행 9월 말 일정 승인 · 계약금 수납 시작 시점(9월 vs 11월) · 타이페이 신청서 공개일</p>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- 주요 일정 -->
+  <section id="milestones" class="bg-slate-900 rounded-2xl shadow-sm p-5 mb-8">
+    <p class="text-[11px] font-bold text-slate-400 tracking-wider mb-3">꼭 기억할 주요 날짜</p>
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+      <div class="bg-slate-800 rounded-xl p-3 border-l-4 border-blue-400">
+        <p class="text-[11px] font-bold text-blue-300">7/5 (일) · 내일</p>
+        <p class="text-xs font-bold text-white mt-1">사무국 화면(어드민) 1차 배포 · 참가자 확정 현황 대시보드 포함</p>
+        <p class="text-[10px] text-slate-400 mt-0.5">배포 후 1주 안정화 → 7/13 주부터 확인 권장</p>
+      </div>
+      <div class="bg-slate-800 rounded-xl p-3 border-l-4 border-blue-400">
+        <p class="text-[11px] font-bold text-blue-300">7/6 (월) · 2일 남음</p>
+        <p class="text-xs font-bold text-white mt-1">21회차 부스도면, 홈페이지에 공개</p>
+        <p class="text-[10px] text-slate-400 mt-0.5">실장님 요청대로 7/5에 미리 열어 최종 점검</p>
+      </div>
+      <div class="bg-slate-800 rounded-xl p-3 border-l-4 border-slate-900">
+        <p class="text-[11px] font-bold text-slate-300">7/30 – 8/2 · 26일 남음</p>
+        <p class="text-xs font-bold text-white mt-1">서일페 21회차 행사 (코엑스 C홀)</p>
+      </div>
+      <div class="bg-slate-800 rounded-xl p-3 border-l-4 border-slate-900">
+        <p class="text-[11px] font-bold text-slate-300">9월</p>
+        <p class="text-xs font-bold text-white mt-1">23회차 참가신청 시작 · 계약금 토스 결제 + 기업은 입금 즉시 세금계산서</p>
+      </div>
+      <div class="bg-slate-800 rounded-xl p-3 border-l-4 border-blue-400">
+        <p class="text-[11px] font-bold text-blue-300">10월</p>
+        <p class="text-xs font-bold text-white mt-1">증빙서류 신청 접수 시작 (작가는 기간제, 기업은 마감일만)</p>
+      </div>
+      <div class="bg-slate-800 rounded-xl p-3 border-l-4 border-blue-400">
+        <p class="text-[11px] font-bold text-blue-300">10/28</p>
+        <p class="text-xs font-bold text-white mt-1">타이페이 행사 · 참가자 명단 + 중국어 도면 준비</p>
+      </div>
+      <div class="bg-slate-800 rounded-xl p-3 border-l-4 border-blue-400">
+        <p class="text-[11px] font-bold text-blue-300">11월</p>
+        <p class="text-xs font-bold text-white mt-1">부일페 행사 · 부대시설 신청 기능 첫 사용</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 요약 카드 3장 -->
+  <section id="summary" class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-10">
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+      <div class="flex items-start justify-between mb-2">
+        <p class="text-sm font-bold text-slate-500">21회차 행사 준비</p>
+        <span class="text-[11px] font-bold text-blue-600 bg-blue-50 rounded-full px-2.5 py-1">순조롭게 진행 중</span>
+      </div>
+      <p class="text-3xl font-black text-blue-600 mb-1">26일 남음</p>
+      <p class="text-xs text-slate-400 leading-relaxed">7/30(목)~8/2(일) 코엑스 C홀. 부스 배정과 부스 번호 입력은 끝났고(7/1), 부스도면은 <strong class="text-slate-700">7/5에 미리 열어 점검 후 7/6(월) 정식 공개</strong>합니다. 같은 날(7/5) 사무국 화면 1차 배포에 <strong class="text-slate-700">참가자 확정 현황 대시보드</strong>가 포함됩니다 — 배포 직후에는 오류를 잡는 안정화 기간이 필요하니, 실장님 확인은 <strong class="text-slate-700">1주 뒤(7/13 주)부터를 권장</strong>합니다.</p>
+    </div>
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+      <div class="flex items-start justify-between mb-2">
+        <p class="text-sm font-bold text-slate-500">9월까지 꼭 이어져야 하는 순서</p>
+        <span class="text-[11px] font-bold text-blue-800 bg-blue-50 rounded-full px-2.5 py-1">여유 시간 확보</span>
+      </div>
+      <p class="text-lg font-black text-slate-900 leading-snug mb-1">토스 결제 완성 → 증빙서류 자동 발행 → 9월 신청 시작</p>
+      <p class="text-xs text-slate-400 leading-relaxed">증빙서류(세금계산서 등) 자동 발행은 토스 결제가 먼저 완성되어야 만들 수 있습니다. <strong class="text-slate-700">토스 작업을 7월에 먼저 시작하기로 결정(7/4)</strong>해서 8월 중순 완성 → 증빙서류 기능을 만들 시간 약 4주를 확보했습니다. 토스 수수료는 1.8%로 낮추기로 협의됨(6/9). 토스는 세금계산서 발행이 불가함이 공식 확인되어(6/26 메일) 발행처는 바로빌로 확정.</p>
+    </div>
+    <div class="bg-white rounded-2xl shadow-sm border-2 border-slate-300 p-6 relative overflow-hidden">
+      <div class="absolute top-0 left-0 w-1.5 h-full bg-blue-900"></div>
+      <div class="flex items-start justify-between mb-2">
+        <p class="text-sm font-bold text-slate-500">주의해서 볼 부분</p>
+        <span class="text-[11px] font-bold text-slate-900 bg-slate-200 rounded-full px-2.5 py-1">관리 중 · 문제 없음</span>
+      </div>
+      <p class="text-base font-black text-slate-900 leading-snug mb-2">8~9월에 일이 몰립니다: 23회차 신청서 + 토스 마무리 + 타이페이 준비</p>
+      <div class="bg-slate-50 border border-slate-200 rounded-xl p-3">
+        <p class="text-[11px] font-bold text-blue-600 mb-1">💬 기획자 의견</p>
+        <p class="text-xs text-slate-600 leading-relaxed">페어 관리 기능이 새로 추가되어 7월 개발 부하도 늘었습니다 — 그래서 정산 관리는 지금 화면에서 가능한 범위(1단계)만 먼저 진행합니다. 8월에는 급하지 않은 사이트 수정 요청을 잠시 미뤄 개발팀이 큰 작업에 집중하도록 하고, 환불·환급 관리 기능은 9월 초 완성으로 여유를 둡니다. <strong class="text-slate-900">타이페이 준비(9월)가 새로 추가되어, 8월 말에 담당 배분을 한 번 더 점검하겠습니다.</strong></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 월별 일정표 (간트) -->
+  <section id="timeline" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-8">
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h2 class="text-lg font-black text-slate-900">월별 일정표 <span class="text-slate-400 font-medium text-sm">· 전체 흐름 · 2026년 7월 – 12월</span></h2>
+        <p class="text-xs text-slate-400 mt-1">막대에 마우스를 올리면 자세한 내용이 보입니다. ◆ 표시는 이번 협의로 새로 추가된 일입니다.</p>
+      </div>
+      <div class="flex flex-col items-end gap-3">
+      <div id="scopeToggle" class="inline-flex items-center bg-slate-100 border border-slate-200 rounded-full p-1 text-[11px] font-bold">
+        <span class="text-slate-400 px-2">보기</span>
+        <button data-scope="all" class="scope-btn active px-3 py-1 rounded-full transition">전체</button>
+        <button data-scope="admin" class="scope-btn px-3 py-1 rounded-full transition">어드민</button>
+        <button data-scope="home" class="scope-btn px-3 py-1 rounded-full transition">홈페이지</button>
+      </div>
+      <div class="flex items-center gap-4 text-[11px] font-medium text-slate-500">
+        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-blue-600"></span>완료·운영 (면 채움)</span>
+        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-[#E8EFFE] border border-blue-200"></span>진행 중</span>
+        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-white border border-blue-700"></span>일정 여유 없음 · 최우선</span>
+        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-white border border-slate-300"></span>예정</span>
+      </div>
+      </div>
+    </div>
+
+    <div class="grid" style="grid-template-columns: 200px repeat(6, 1fr);">
+      <div></div>
+      <div class="text-center text-[11px] font-bold text-slate-400 pb-2 border-b border-slate-200">7월</div>
+      <div class="text-center text-[11px] font-bold text-slate-400 pb-2 border-b border-slate-200">8월</div>
+      <div class="text-center text-[11px] font-bold text-slate-400 pb-2 border-b border-slate-200">9월</div>
+      <div class="text-center text-[11px] font-bold text-slate-400 pb-2 border-b border-slate-200">10월</div>
+      <div class="text-center text-[11px] font-bold text-slate-400 pb-2 border-b border-slate-200">11월</div>
+      <div class="text-center text-[11px] font-bold text-slate-400 pb-2 border-b border-slate-200">12월</div>
+    </div>
+
+    <div class="relative">
+      <div class="absolute top-0 bottom-0 border-l-2 border-dashed border-slate-900 z-10" style="left: calc(200px + (100% - 200px) * 0.017);">
+        <span class="absolute -top-1 left-1.5 text-[10px] font-bold text-slate-900 bg-slate-100 rounded px-1.5 py-0.5 whitespace-nowrap">오늘 7/4</span>
+      </div>
+      <div class="absolute top-0 bottom-0 border-l-2 border-slate-400 z-10" style="left: calc(200px + (100% - 200px) * 0.16);">
+        <span class="absolute -top-1 left-1 text-[10px] font-bold text-slate-700 whitespace-nowrap">21회차 행사</span>
+      </div>
+      <div class="absolute top-0 bottom-0 border-l-2 border-blue-300 z-10" style="left: calc(200px + (100% - 200px) * 0.65);">
+        <span class="absolute -top-1 left-1 text-[10px] font-bold text-blue-500 whitespace-nowrap">타이페이 10/28</span>
+      </div>
+
+      <div class="grid items-center py-2.5 border-b border-slate-100" style="grid-template-columns: 200px repeat(6, 1fr);">
+        <div class="pr-3"><p class="text-xs font-bold text-slate-700">[홈페이지] 부스도면 공개 · 행사 지원</p><p class="text-[10px] text-slate-400">21회차 행사 관련</p></div>
+        <div class="col-span-6 relative h-7">
+          <div class="gantt-bar absolute h-7 rounded-lg bg-[#E8EFFE] flex items-center px-2" style="left:0%; width:17%;">
+            <span class="text-[10px] font-bold text-[#333D4B] truncate">7/5 미리 공개 → 행사 기간 현장 지원</span>
+            <span class="tooltip">담당: 데이먼 · 부스 번호 입력 완료(7/1) · 행사 7/30~8/2</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid items-center py-2.5 border-b border-slate-100" style="grid-template-columns: 200px repeat(6, 1fr);">
+        <div class="pr-3"><p class="text-xs font-bold text-slate-700">[어드민] 참가자 확정 현황 대시보드</p><p class="text-[10px] text-slate-400">실장님 주요 관심 · 7/5 1차 배포</p></div>
+        <div class="col-span-6 relative h-7">
+          <div class="gantt-bar absolute h-7 rounded-lg bg-blue-600 flex items-center px-2" style="left:0%; width:10%;">
+            <span class="text-[10px] font-bold text-white truncate">7/5 배포 → 1주 안정화 → 확인</span>
+            <span class="tooltip">담당: 데이먼·수 · 배포 직후보다 안정화 후(7/13 주~) 확인 권장</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid items-center py-2.5 border-b border-slate-100" style="grid-template-columns: 200px repeat(6, 1fr);">
+        <div class="pr-3"><p class="text-xs font-bold text-slate-700">[어드민] 페어 관리 기능 (부스 가격·부대시설 관리)</p><p class="text-[10px] text-slate-400">◆ 새로 추가 · 정산 가격 기능의 선행 작업</p></div>
+        <div class="col-span-6 relative h-7">
+          <div class="gantt-bar absolute h-7 rounded-lg bg-white border border-blue-700 flex items-center px-2" style="left:3%; width:20%;">
+            <span class="text-[10px] font-bold text-blue-900 truncate">부스 타입·부대시설·프로모션(할인)을 상품처럼 관리 → 8월 초 완성</span>
+            <span class="tooltip">담당: 데이먼·수 · 쇼핑몰 상품 관리 방식 설계 · 정산의 가격·부대시설 기능보다 먼저 개발</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid items-center py-2.5 border-b border-slate-100" style="grid-template-columns: 200px repeat(6, 1fr);">
+        <div class="pr-3"><p class="text-xs font-bold text-slate-700">[어드민] 정산 관리 기능</p><p class="text-[10px] text-slate-400">1단계: 현재 화면 범위 → 2단계: 가격 연동</p></div>
+        <div class="col-span-6 relative h-7">
+          <div class="gantt-bar absolute h-7 rounded-lg bg-[#E8EFFE] flex items-center px-2" style="left:3%; width:24%;">
+            <span class="text-[10px] font-bold text-[#333D4B] truncate">1단계: 지금 화면에서 가능한 범위 먼저 → 2단계: 페어 관리 완성 후 가격·부대시설 연동</span>
+            <span class="tooltip">담당: 데이먼·수 · 2단계(OCH-1434·1438)는 페어 관리 완성 후 8월 진행</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid items-center py-2.5 border-b border-slate-100" style="grid-template-columns: 200px repeat(6, 1fr);">
+        <div class="pr-3"><p class="text-xs font-bold text-slate-700">[홈페이지] 토스 결제 (퀵계좌이체·가상계좌)</p><p class="text-[10px] text-slate-400">◆ 새로 추가 · 최우선 · 동시 진행</p></div>
+        <div class="col-span-6 relative h-7">
+          <div class="gantt-bar absolute h-7 rounded-lg bg-white border border-blue-700 flex items-center px-2" style="left:8%; width:17%;">
+            <span class="text-[10px] font-bold text-blue-900 truncate">7월 시작 → 8월 중순 완성 · 토스 데이터 형태가 정산 화면 설계를 좌우</span>
+            <span class="tooltip">담당: 데이먼 · 토스가 주는 데이터 형태 확인이 정산 화면 설계의 전제 → 페어 관리와 동시 진행 · 수수료 1.8% 협의 완료</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid items-center py-2.5 border-b border-slate-100" style="grid-template-columns: 200px repeat(6, 1fr);">
+        <div class="pr-3"><p class="text-xs font-bold text-slate-700">[홈페이지] 23회차 참가신청서 만들기</p><p class="text-[10px] text-slate-400">◆ 새로 추가 · 킨텍스 · 27년 3월 행사</p></div>
+        <div class="col-span-6 relative h-7">
+          <div class="gantt-bar absolute h-7 rounded-lg bg-white border border-blue-700 flex items-center px-2" style="left:17%; width:20%;">
+            <span class="text-[10px] font-bold text-blue-900 truncate">8월 제작 → 9월 신청 시작 (토스 계약금 결제 포함)</span>
+            <span class="tooltip">담당: 데이먼·수 · 행사 끝난 직후 바로 시작 · 9월 오픈은 미룰 수 없는 날짜</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid items-center py-2.5 border-b border-slate-100" style="grid-template-columns: 200px repeat(6, 1fr);">
+        <div class="pr-3"><p class="text-xs font-bold text-slate-700">[홈페이지·어드민] 증빙서류 자동 발행 기능</p><p class="text-[10px] text-slate-400">세금계산서·현금영수증 · 최우선</p></div>
+        <div class="col-span-6 relative h-7">
+          <div class="gantt-bar absolute h-7 rounded-lg bg-white border border-blue-700 flex items-center px-2" style="left:25%; width:25%;">
+            <span class="text-[10px] font-bold text-blue-900 truncate">신청 화면 + 사무국 처리 화면 + 자동 발행 + 알림</span>
+            <span class="tooltip">토스 결제 완성 후 시작 · 발행 대행사(바로빌) 가입 완료 · 10월 접수 시작 전 완성</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid items-center py-2.5 border-b border-slate-100" style="grid-template-columns: 200px repeat(6, 1fr);">
+        <div class="pr-3"><p class="text-xs font-bold text-slate-700">[어드민] 환불·환급 관리 기능</p><p class="text-[10px] text-slate-400">취소·초과 입금 돌려주기</p></div>
+        <div class="col-span-6 relative h-7">
+          <div class="gantt-bar absolute h-7 rounded-lg bg-white border border-slate-300 flex items-center px-2" style="left:21%; width:19%;">
+            <span class="text-[10px] font-bold text-slate-600 truncate">환불 계산·처리 기록 화면</span>
+            <span class="tooltip">담당은 8월 초 배정 · 9월 초 완성 목표 · 23회차 계약금 취소에 대비</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid items-center py-2.5 border-b border-slate-100" style="grid-template-columns: 200px repeat(6, 1fr);">
+        <div class="pr-3"><p class="text-xs font-bold text-slate-700">[홈페이지] 타이페이 행사 준비</p><p class="text-[10px] text-slate-400">◆ 새로 추가 · 10/28 행사</p></div>
+        <div class="col-span-6 relative h-7">
+          <div class="gantt-bar absolute h-7 rounded-lg bg-white border border-slate-300 flex items-center px-2" style="left:34%; width:20%;">
+            <span class="text-[10px] font-bold text-slate-600 truncate">9월 제작 · 참가자 명단 + 중국어 도면</span>
+            <span class="tooltip">확정자 신청서를 언제 여는지는 확인 필요 · 10/28은 미룰 수 없는 날짜</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid items-center py-2.5 border-b border-slate-100" style="grid-template-columns: 200px repeat(6, 1fr);">
+        <div class="pr-3"><p class="text-xs font-bold text-slate-700">[홈페이지] 참가신청 페이지 글자 크기 수정</p><p class="text-[10px] text-slate-400">◆ 새로 추가 · 디자인 작업</p></div>
+        <div class="col-span-6 relative h-7">
+          <div class="gantt-bar absolute h-7 rounded-lg bg-[#E8EFFE] flex items-center px-2" style="left:1%; width:6%;">
+            <span class="text-[10px] font-bold text-[#333D4B] truncate">7월 초</span>
+            <span class="tooltip">담당: 수(soohyun) · 신청서 화면과 안내 페이지의 글자 크기를 통일</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid items-center py-2.5 border-b border-slate-100" style="grid-template-columns: 200px repeat(6, 1fr);">
+        <div class="pr-3"><p class="text-xs font-bold text-slate-700">[홈페이지] 첫 화면 1차 개선</p><p class="text-[10px] text-slate-400">행사가 잘 보이게 · beta 글자 삭제</p></div>
+        <div class="col-span-6 relative h-7">
+          <div class="gantt-bar absolute h-7 rounded-lg bg-white border border-slate-300 flex items-center px-2" style="left:25%; width:17%;">
+            <span class="text-[10px] font-bold text-slate-600 truncate">디자인 8월 → 9월 중순 적용</span>
+            <span class="tooltip">디자인: Colin / 적용: 수 · 23회차 신청 시작 전에 완료해 신청자 유입을 높임</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid items-center py-2.5 border-b border-slate-100" style="grid-template-columns: 200px repeat(6, 1fr);">
+        <div class="pr-3"><p class="text-xs font-bold text-slate-700">[홈페이지·어드민] 부대시설 신청 기능</p><p class="text-[10px] text-slate-400">◆ 새로 추가 · 의자·전기·벽체 등</p></div>
+        <div class="col-span-6 relative h-7">
+          <div class="gantt-bar absolute h-7 rounded-lg bg-white border border-slate-300 flex items-center px-2" style="left:41%; width:24%;">
+            <span class="text-[10px] font-bold text-slate-600 truncate">9월 중순 시작 → 10월 말 완성 (부일페 2주 전)</span>
+            <span class="tooltip">참가 확정자가 직접 신청·결제(무통장 포함) · 11월 부일페부터 사용</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid items-center py-2.5 border-b border-slate-100" style="grid-template-columns: 200px repeat(6, 1fr);">
+        <div class="pr-3"><p class="text-xs font-bold text-slate-700">증빙서류 신청 접수 운영</p><p class="text-[10px] text-slate-400">사무국 운영 일정</p></div>
+        <div class="col-span-6 relative h-7">
+          <div class="gantt-bar absolute h-7 rounded-lg bg-blue-600 flex items-center px-2" style="left:50%; width:17%;">
+            <span class="text-[10px] font-bold text-white truncate">10월: 작가는 시작~마감 기간제, 기업은 마감일만</span>
+            <span class="tooltip">기업은 입금 즉시 발행되므로 시작일 불필요 · 신청이 오면 사무국에 알림 + 처리할 건수 표시</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid items-center py-2.5" style="grid-template-columns: 200px repeat(6, 1fr);">
+        <div class="pr-3"><p class="text-xs font-bold text-slate-700">[홈페이지] 첫 화면 2차 전면 개편</p><p class="text-[10px] text-slate-400">실장님 계획 반영 (11~12월)</p></div>
+        <div class="col-span-6 relative h-7">
+          <div class="gantt-bar absolute h-7 rounded-lg bg-white border border-slate-300 flex items-center px-2" style="left:67%; width:32%;">
+            <span class="text-[10px] font-bold text-slate-600 truncate">11~12월 · 창작자 플랫폼다운 모습으로 새 단장</span>
+            <span class="tooltip">9월 1차 개선과 별도 진행 · 디자인·기획을 먼저 준비</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 월별 캘린더 -->
+  <section id="calendar" class="mb-8">
+    <div class="mb-4">
+      <h2 class="text-lg font-black text-slate-900">월별 캘린더 <span class="text-slate-400 font-medium text-sm">· 주차별 할 일</span></h2>
+      <p class="text-xs text-slate-400 mt-1">달력에서 각 주(월~일) 아래에 그 주에 할 일이 표시됩니다. 파란 글씨(<span class="text-blue-600 font-bold">OCH-0000</span>)를 누르면 개발팀 업무기록(지라)의 해당 작업으로 이동합니다. '티켓 예정'은 아직 지라 등록 전인 항목입니다.</p>
+      <div class="flex items-center gap-4 text-[11px] font-medium text-slate-500 mt-2">
+        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-white border border-blue-700"></span>일정 여유 없음 · 최우선</span>
+        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-[#E8EFFE] border border-blue-200"></span>개발 작업</span>
+        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-white border border-slate-300"></span>사무국·운영</span>
+        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-slate-900"></span>행사·공개일</span>
+      </div>
+    </div>
+    <div id="calRoot" class="space-y-5"></div>
+  </section>
+
+  <!-- 기획 일정 -->
+  <section id="planning" class="mb-8">
+    <div class="mb-4">
+      <h2 class="text-lg font-black text-slate-900">기획 일정 <span class="text-slate-400 font-medium text-sm">· 개발보다 한발 앞서 준비해야 하는 문서들</span></h2>
+      <p class="text-xs text-slate-400 mt-1">개발이 시작되기 전에 화면 설계와 정책(기획 문서)이 준비되어 있어야 개발이 멈추지 않습니다. 원칙: <strong class="text-slate-600">기획은 개발 착수 최소 1~2주 전 완료</strong>.</p>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-5">
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="text-left text-[11px] tracking-wider text-slate-400 border-b-2 border-slate-200">
+              <th class="py-3 pr-4 font-bold">기획 항목</th>
+              <th class="py-3 pr-4 font-bold whitespace-nowrap">기획 마감 목표</th>
+              <th class="py-3 pr-4 font-bold whitespace-nowrap">진행 상태</th>
+              <th class="py-3 font-bold">왜 이 시점인지 · 담을 내용</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 text-xs">
+            <tr class="bg-slate-100/40">
+              <td class="py-3.5 pr-4"><p class="font-bold text-slate-800">[어드민] 페어 관리 기능</p><p class="text-[11px] text-slate-400">🔥 지금 가장 급함</p></td>
+              <td class="py-3.5 pr-4 whitespace-nowrap"><span class="font-bold text-slate-900">7월 1주</span></td>
+              <td class="py-3.5 pr-4 whitespace-nowrap"><span class="inline-block text-[11px] font-bold text-blue-700 bg-blue-50 border border-blue-200 rounded-full px-3 py-1">진행 중</span></td>
+              <td class="py-3.5 text-slate-600 leading-relaxed">개발이 7/6 주에 시작되므로 즉시 착수. <strong class="text-slate-800">쇼핑몰에서 상품을 관리하듯</strong> 부스 타입별 가격, 부대시설 항목·단가, 프로모션(할인) 등 신청서 작성 시 노출되는 모든 항목을 등록·수정할 수 있는 구조로 설계.</td>
+            </tr>
+            <tr class="bg-slate-100/40">
+              <td class="py-3.5 pr-4"><p class="font-bold text-slate-800">[홈페이지] 참가비 결제 (토스 퀵계좌이체·가상계좌)</p></td>
+              <td class="py-3.5 pr-4 whitespace-nowrap"><span class="font-bold text-slate-900">7월 2주</span></td>
+              <td class="py-3.5 pr-4 whitespace-nowrap"><span class="inline-block text-[11px] font-bold text-slate-500 bg-slate-100 border border-slate-200 rounded-full px-3 py-1">시작 전</span></td>
+              <td class="py-3.5 text-slate-600 leading-relaxed">개발이 7/13 주 시작. 결제 화면 흐름, 결제 실패·중단 시 처리, 입금 확인 안내 문구까지 포함. 토스가 주는 데이터 형태 확인 결과를 반영해 정산 어드민 화면 설계와 맞물림.</td>
+            </tr>
+            <tr>
+              <td class="py-3.5 pr-4"><p class="font-bold text-slate-800">[홈페이지] 23회차 참가신청서</p></td>
+              <td class="py-3.5 pr-4 whitespace-nowrap"><span class="font-bold text-slate-700">7월 중 (행사 전)</span></td>
+              <td class="py-3.5 pr-4 whitespace-nowrap"><span class="inline-block text-[11px] font-bold text-slate-500 bg-slate-100 border border-slate-200 rounded-full px-3 py-1">시작 전</span></td>
+              <td class="py-3.5 text-slate-600 leading-relaxed">개발이 8/3 주 시작이라 행사 전에 초안 완료 권장. <strong class="text-slate-800">한 기업이 여러 브랜드로 신청하는 것을 허용할지 정책 결정 포함</strong> — 이 결정이 신청서 구조 전체에 영향.</td>
+            </tr>
+            <tr>
+              <td class="py-3.5 pr-4"><p class="font-bold text-slate-800">[홈페이지·어드민] 증빙 발행 기능</p></td>
+              <td class="py-3.5 pr-4 whitespace-nowrap"><span class="font-bold text-slate-700">8월 1주</span></td>
+              <td class="py-3.5 pr-4 whitespace-nowrap"><span class="inline-block text-[11px] font-bold text-blue-800 bg-blue-50 border border-blue-300 rounded-full px-3 py-1">일부 완료</span><p class="text-[10px] text-slate-400 mt-1">홈페이지 완료 · 어드민 시작 전</p></td>
+              <td class="py-3.5 text-slate-600 leading-relaxed">개발이 8/17 주 시작. 홈페이지 신청 폼 + 어드민 처리 화면 + 기업 즉시 자동발행 + 사무국 알림·처리 건수. <strong class="text-slate-800">현금영수증을 취소하고 세금계산서로 바꿔 발행하는 절차</strong>(토스 6/26 답변 반영)도 화면에 담아야 함.</td>
+            </tr>
+            <tr>
+              <td class="py-3.5 pr-4"><p class="font-bold text-slate-800">[홈페이지] 메인 화면 (1차 개선)</p></td>
+              <td class="py-3.5 pr-4 whitespace-nowrap"><span class="font-bold text-slate-700">8월 1주</span></td>
+              <td class="py-3.5 pr-4 whitespace-nowrap"><span class="inline-block text-[11px] font-bold text-slate-500 bg-slate-100 border border-slate-200 rounded-full px-3 py-1">시작 전</span></td>
+              <td class="py-3.5 text-slate-600 leading-relaxed">디자인(Colin)이 8월 중 착수하므로 그 전에 방향 정리: 행사 강조 구성, beta 글자 삭제 범위, 23회차 신청 유도 동선.</td>
+            </tr>
+            <tr>
+              <td class="py-3.5 pr-4"><p class="font-bold text-slate-800">[홈페이지] 타이페이 신청·명단·중국어 도면</p></td>
+              <td class="py-3.5 pr-4 whitespace-nowrap"><span class="font-bold text-slate-700">8월 중</span></td>
+              <td class="py-3.5 pr-4 whitespace-nowrap"><span class="inline-block text-[11px] font-bold text-slate-500 bg-slate-100 border border-slate-200 rounded-full px-3 py-1">시작 전</span></td>
+              <td class="py-3.5 text-slate-600 leading-relaxed">개발이 9/7 주 시작. 확정자 신청서 오픈일(미정)을 실장님과 확정한 뒤 흐름 설계. 중국어 표기 범위·번역 담당도 함께 정리.</td>
+            </tr>
+            <tr>
+              <td class="py-3.5 pr-4"><p class="font-bold text-slate-800">[홈페이지] 부대시설 신청 + [어드민] 부대시설 신청 관리</p></td>
+              <td class="py-3.5 pr-4 whitespace-nowrap"><span class="font-bold text-slate-700">8월 말 ~ 9월 1주</span></td>
+              <td class="py-3.5 pr-4 whitespace-nowrap"><span class="inline-block text-[11px] font-bold text-slate-500 bg-slate-100 border border-slate-200 rounded-full px-3 py-1">시작 전</span></td>
+              <td class="py-3.5 text-slate-600 leading-relaxed">개발이 9/14 주 시작. 신청자 화면(항목 선택·결제·무통장 입금)과 사무국 관리 화면(신청 확인·입금 대사·현장 전달)을 한 세트로 기획. 항목·가격은 페어 관리 데이터를 그대로 사용하는 전제로 설계.</td>
+            </tr>
+            <tr>
+              <td class="py-3.5 pr-4"><p class="font-bold text-slate-800">[홈페이지] 첫 화면 2차 전면 개편</p></td>
+              <td class="py-3.5 pr-4 whitespace-nowrap"><span class="font-bold text-slate-700">10월 말</span></td>
+              <td class="py-3.5 pr-4 whitespace-nowrap"><span class="inline-block text-[11px] font-bold text-slate-500 bg-slate-100 border border-slate-200 rounded-full px-3 py-1">시작 전</span></td>
+              <td class="py-3.5 text-slate-600 leading-relaxed">11월 디자인 착수 전. "창작자 플랫폼다운 모습"의 구체적 정의와 우선 노출 콘텐츠 정리.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="bg-blue-50/60 border border-blue-100 rounded-2xl p-5">
+      <p class="text-xs font-black text-blue-700 tracking-wider mb-3">💬 기획자 조언 — 위 목록 외에 기획·정책 결정이 필요한 것들</p>
+      <div class="space-y-2 text-xs text-slate-600">
+        <p><strong class="text-slate-800">① 기업 정보 인증 정책 (7월 중)</strong> — 기업 정보를 별도로 만드는 구조 개선(OCH-1452)이 7월에 개발되는데, "기업 인증 단계를 둘지"가 아직 미정(6/30 논의). 개발 완료 전에 정책을 정해야 재작업이 없습니다.</p>
+        <p><strong class="text-slate-800">② 증빙 신청 운영 세부 정책 (9월)</strong> — 작가 시작·마감일의 실제 날짜, 마감 임박 알림 여부, 마감 후 뒤늦은 요청 처리 기준. 기능 개발과 별개로 사무국 운영 규칙 문서가 필요합니다.</p>
+        <p><strong class="text-slate-800">③ 계약금·환불 규정 안내문 (8월)</strong> — 23회차부터 계약금을 토스로 받으면, 취소 시 해약금 계산·환불 절차를 신청자에게 안내하는 문구가 신청서에 들어가야 합니다. 환불 정책 자체는 정책정의서 v2로 완료 — 신청자용 안내문만 추가로 필요.</p>
+        <p><strong class="text-slate-800">④ 참가자 확정 현황 대시보드 2차 요구사항 (7월 중순)</strong> — 7/5 배포 후 실장님이 실제로 써보시면 추가 요청이 나올 가능성이 높습니다. 안정화 확인(7/13 주) 때 의견을 모아 2차 개선 범위를 정하는 것을 추천합니다.</p>
+        <p class="text-slate-400">참고: 환불·환급, 정산 관리는 정책정의서 v2로 기획이 이미 완료되어 추가 기획이 필요 없습니다.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 결정 사항 / 확인 요청 -->
+  <section id="decisions" class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8">
+    <div class="bg-blue-50/60 border border-blue-100 rounded-2xl p-5">
+      <p class="text-xs font-black text-blue-700 tracking-wider mb-3">📌 이번에 결정된 사항 (7/4 협의)</p>
+      <div class="space-y-2 text-xs text-slate-600">
+        <p><strong class="text-slate-800">① 증빙서류는 바로빌 한 곳에서 발행 (확정)</strong> — 토스가 "세금계산서는 결제 중개사라 발행 불가"라고 공식 답변(6/26 메일)하여, 세금계산서·현금영수증 모두 발행 대행사 '바로빌'로 통일이 확정. 토스가 자동으로 끊어주는 현금영수증은 중복 발행을 막기 위해 끄기 설정(토스에서 일괄 끄기 가능 확인).</p>
+        <p><strong class="text-slate-800">② 토스 결제 작업을 7월에 먼저 시작</strong> — 행사 준비와 함께 진행. 뒤에 이어지는 증빙서류 기능을 만들 시간 4주를 확보했습니다.</p>
+        <p><strong class="text-slate-800">③ 부대시설 신청은 11월 부일페 기준</strong> — 10월 말까지 완성. 정산 관리 기능에서 만든 가격 계산을 그대로 활용해 제작 기간을 줄입니다.</p>
+        <p><strong class="text-slate-800">④ 홈페이지 첫 화면은 두 번에 나눠 개선</strong> — 9월 신청 시작 전에는 행사가 잘 보이게 다듬고(1차), 전면 새 단장(2차)은 실장님 계획대로 11~12월에 진행합니다.</p>
+        <p><strong class="text-slate-800">⑤ 정산 개발 순서 조정 (개발팀 협의)</strong> — 정산 화면에서 부대시설 신청 타입이 노출되려면, 그 원본 데이터를 관리하는 <strong>'페어 관리' 기능이 먼저</strong> 필요합니다. 페어 관리는 쇼핑몰 상품 관리 방식으로 부스 타입·부대시설·프로모션(할인) 등 신청서 노출 항목을 등록·수정하도록 설계. 정산 관리는 지금 화면에서 가능한 범위(1단계)를 먼저 만들고, 가격 연동(2단계)은 페어 관리 완성 후 진행. 토스 퀵계좌이체·가상계좌 연동은 토스가 주는 데이터 형태가 정산 화면 설계를 좌우하므로 동시에 진행합니다.</p>
+      </div>
+    </div>
+    <div class="bg-slate-100/70 border border-slate-300 rounded-2xl p-5">
+      <p class="text-xs font-black text-slate-900 tracking-wider mb-3">⚠️ 실장님께 확인 부탁드릴 사항</p>
+      <div class="space-y-2 text-xs text-slate-600">
+        <p><strong class="text-slate-800">① 증빙서류 기능 완성 시점</strong> — 원래 계획은 "7월 말"이었지만, 토스 결제가 먼저 완성되어야 해서 실제로는 9월 말 완성이 현실적입니다. 일정 변경 승인 부탁드립니다.</p>
+        <p><strong class="text-slate-800">② 23회차 계약금을 언제부터 받을지</strong> — 기존 메모에는 "11월부터 토스로 계약금"이라 되어 있습니다. 9월 신청 시작과 동시에 받을지, 11월 확정 후 받을지 확인이 필요합니다.</p>
+        <p><strong class="text-slate-800">③ 타이페이 확정자 신청서 공개일</strong> — 대만 행사 확정자용 신청서를 언제 열고 언제 공지할지 아직 정해지지 않았습니다.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 할 일 상세 목록 -->
+  <section id="tasks" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-10">
+    <div class="flex items-center justify-between flex-wrap gap-2 mb-1">
+      <h2 class="text-lg font-black text-slate-900">할 일 상세 목록</h2>
+      <div class="flex items-center gap-3 text-[11px] text-slate-400 font-medium">
+        <span>✅ 완료</span><span>⏳ 남은 일</span><span>⚠️ 주의·확인</span><span class="text-orange-600">📌 실장님 확인</span>
+      </div>
+    </div>
+    <p class="text-xs text-slate-400 mb-3">각 항목은 다음 액션과 일정만 먼저 보여줍니다. 진행 내역은 '자세히 보기'를 누르면 펼쳐집니다. 임박한 일정(D-3 이내)은 주황색으로 표시됩니다. (7/4 기준)</p>
+    <div>
+      <div class="task-row py-4 border-b border-slate-100" data-scope="home">
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="text-[10px] font-bold text-blue-700 bg-blue-50 border border-blue-200 rounded px-1.5 py-0.5">홈페이지</span>
+          <p class="text-sm font-bold text-slate-900">21회차 부스도면 공개</p>
+          <span class="text-[11px] text-slate-400">코엑스 C홀 행사 준비</span>
+          <span class="ml-auto flex items-center gap-2 flex-wrap">
+            <span class="text-[11px] text-slate-500">데이먼</span>
+            <span class="text-[11px] font-bold text-blue-700 bg-blue-50 border-blue-200 border rounded-full px-2.5 py-0.5 whitespace-nowrap">진행 중</span>
+            <span class="text-[11px] font-bold text-orange-700 bg-orange-50 border-orange-300 border rounded-md px-2 py-0.5 whitespace-nowrap">7/5 사전 공개 · D-1</span> <span class="text-[11px] font-bold text-orange-700 bg-orange-50 border-orange-300 border rounded-md px-2 py-0.5 whitespace-nowrap">7/6 정식 공개 · D-2</span>
+          </span>
+        </div>
+        <p class="mt-1.5 text-xs text-slate-600">다음 액션 · <strong class="text-slate-900">해외 기업 1곳 부스 번호 입력</strong> 후 내일(7/5) 미리 공개</p>
+        <details class="mt-1.5">
+          <summary class="text-[11px] font-bold text-blue-600">자세히 보기</summary>
+          <div class="mt-2 space-y-1 text-xs text-slate-500 leading-relaxed"><p>✅ 부스 배정 명단 전달 (6/29)</p><p>✅ 21회차 부스 번호 일괄 입력 (7/1)</p><p>✅ 도면에서 부스 찾기 점검 (6/30)</p><p>⏳ 남은 일: 해외 기업 1곳 수동 입력 → 7/5 사전 공개 → 7/6 정식 공개</p></div>
+        </details>
+      </div>
+      <div class="task-row py-4 border-b border-slate-100" data-scope="admin">
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="text-[10px] font-bold text-slate-700 bg-white border border-slate-300 rounded px-1.5 py-0.5">어드민</span>
+          <p class="text-sm font-bold text-slate-900">참가자 확정 현황 대시보드</p>
+          <span class="text-[11px] text-slate-400">실장님 주요 관심</span>
+          <span class="ml-auto flex items-center gap-2 flex-wrap">
+            <span class="text-[11px] text-slate-500">데이먼 · 수</span>
+            <span class="text-[11px] font-bold text-orange-700 bg-orange-50 border-orange-200 border rounded-full px-2.5 py-0.5 whitespace-nowrap">배포 예정</span>
+            <span class="text-[11px] font-bold text-orange-700 bg-orange-50 border-orange-300 border rounded-md px-2 py-0.5 whitespace-nowrap">7/5 1차 배포 · D-1</span>
+          </span>
+        </div>
+        <p class="mt-1.5 text-xs text-slate-600">다음 액션 · 내일(7/5) 사무국 화면 1차 배포에 포함되어 공개</p>
+        <details class="mt-1.5">
+          <summary class="text-[11px] font-bold text-blue-600">자세히 보기</summary>
+          <div class="mt-2 space-y-1 text-xs text-slate-500 leading-relaxed"><p>⏳ 배포 후 1주간 안정화(숫자 오류 등 점검) 진행</p><p>⏳ 안정화 완료 시점은 별도 보고 예정</p></div>
+        </details>
+        <div class="mt-2 bg-orange-50 border border-orange-200 rounded-lg px-3 py-2 text-xs text-slate-700">📌 <strong class="text-slate-900">실장님 확인 권장</strong> — 배포 직후보다 안정화가 끝나는 7/13 주부터 확인을 권장드립니다.</div>
+      </div>
+      <div class="task-row py-4 border-b border-slate-100" data-scope="admin">
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="text-[10px] font-bold text-slate-700 bg-white border border-slate-300 rounded px-1.5 py-0.5">어드민</span><span class="text-[10px] font-bold text-slate-400 border border-slate-300 rounded px-1.5 py-0.5">신규</span>
+          <p class="text-sm font-bold text-slate-900">페어 관리 기능</p>
+          <span class="text-[11px] text-slate-400">부스 가격·부대시설·프로모션 관리</span>
+          <span class="ml-auto flex items-center gap-2 flex-wrap">
+            <span class="text-[11px] text-slate-500">데이먼 · 수</span>
+            <span class="text-[11px] font-bold text-blue-700 bg-blue-50 border-blue-200 border rounded-full px-2.5 py-0.5 whitespace-nowrap">기획 진행 중</span>
+            <span class="text-[11px] font-bold text-slate-600 bg-white border-slate-200 border rounded-md px-2 py-0.5 whitespace-nowrap">개발 7/6 주 시작</span> <span class="text-[11px] font-bold text-slate-600 bg-white border-slate-200 border rounded-md px-2 py-0.5 whitespace-nowrap">8월 초 완성</span>
+          </span>
+        </div>
+        <p class="mt-1.5 text-xs text-slate-600">다음 액션 · 이번 주 <strong class="text-slate-900">기획 확정 → 다음 주 개발 착수</strong></p>
+        <details class="mt-1.5">
+          <summary class="text-[11px] font-bold text-blue-600">자세히 보기</summary>
+          <div class="mt-2 space-y-1 text-xs text-slate-500 leading-relaxed"><p>⏳ 쇼핑몰 상품 관리 방식으로 부스 타입·부대시설·할인 항목 등록/수정</p><p>⚠️ 선행 필수: 정산 관리 2단계·부대시설 신청이 이 작업 완료를 기다림</p></div>
+        </details>
+      </div>
+      <div class="task-row py-4 border-b border-slate-100" data-scope="admin">
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="text-[10px] font-bold text-slate-700 bg-white border border-slate-300 rounded px-1.5 py-0.5">어드민</span>
+          <p class="text-sm font-bold text-slate-900">정산 관리 기능</p>
+          <span class="text-[11px] text-slate-400">참가비 입금 확인·기록</span>
+          <span class="ml-auto flex items-center gap-2 flex-wrap">
+            <span class="text-[11px] text-slate-500">데이먼 · 수</span>
+            <span class="text-[11px] font-bold text-blue-700 bg-blue-50 border-blue-200 border rounded-full px-2.5 py-0.5 whitespace-nowrap">진행 중</span>
+            <span class="text-[11px] font-bold text-slate-600 bg-white border-slate-200 border rounded-md px-2 py-0.5 whitespace-nowrap">1단계 7월</span> <span class="text-[11px] font-bold text-slate-600 bg-white border-slate-200 border rounded-md px-2 py-0.5 whitespace-nowrap">전체 완성 8월 중</span>
+          </span>
+        </div>
+        <p class="mt-1.5 text-xs text-slate-600">다음 액션 · 다음 주(7/6 주) <strong class="text-slate-900">1단계(현재 화면 범위) 개발 착수</strong></p>
+        <details class="mt-1.5">
+          <summary class="text-[11px] font-bold text-blue-600">자세히 보기</summary>
+          <div class="mt-2 space-y-1 text-xs text-slate-500 leading-relaxed"><p>✅ 기획 문서·화면 설계 완료 (정책정의서 v2)</p><p>✅ 미리보기 시안 공유 (6/24)</p><p>⏳ 1단계: 입금 목록·상세·참가자 검색·무통장 직접 기록 (7월)</p><p>⏳ 2단계: 가격 자동 계산·수량 수정 — 페어 관리 완성 후 (8월)</p><p>⚠️ 토스 데이터 형태에 따라 화면 일부가 달라질 수 있음</p></div>
+        </details>
+      </div>
+      <div class="task-row py-4 border-b border-slate-100" data-scope="home">
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="text-[10px] font-bold text-blue-700 bg-blue-50 border border-blue-200 rounded px-1.5 py-0.5">홈페이지</span><span class="text-[10px] font-bold text-slate-400 border border-slate-300 rounded px-1.5 py-0.5">신규</span>
+          <p class="text-sm font-bold text-slate-900">토스 결제 (퀵계좌이체·가상계좌)</p>
+          <span class="text-[11px] text-slate-400">23회차 계약금 결제용</span>
+          <span class="ml-auto flex items-center gap-2 flex-wrap">
+            <span class="text-[11px] text-slate-500">데이먼</span>
+            <span class="text-[11px] font-bold text-slate-500 bg-slate-100 border-slate-200 border rounded-full px-2.5 py-0.5 whitespace-nowrap">착수 대기</span>
+            <span class="text-[11px] font-bold text-slate-600 bg-white border-slate-200 border rounded-md px-2 py-0.5 whitespace-nowrap">7월 중 착수</span> <span class="text-[11px] font-bold text-slate-600 bg-white border-slate-200 border rounded-md px-2 py-0.5 whitespace-nowrap">8월 중순 완성</span>
+          </span>
+        </div>
+        <p class="mt-1.5 text-xs text-slate-600">다음 액션 · <strong class="text-slate-900">7월 중 착수</strong> — 증빙서류 자동 발행의 선행 작업</p>
+        <details class="mt-1.5">
+          <summary class="text-[11px] font-bold text-blue-600">자세히 보기</summary>
+          <div class="mt-2 space-y-1 text-xs text-slate-500 leading-relaxed"><p>✅ 계좌이체 수수료 1.8% 인하 협의 (6/9)</p><p>✅ 토스 세금계산서 불가 공식 확인 → 발행처 바로빌 확정 (6/26)</p><p>⚠️ 확인 필요: 계약금 수납 시작 시점 (9월 신청 시 vs 11월 확정 후)</p></div>
+        </details>
+      </div>
+      <div class="task-row py-4 border-b border-slate-100" data-scope="home">
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="text-[10px] font-bold text-blue-700 bg-blue-50 border border-blue-200 rounded px-1.5 py-0.5">홈페이지</span><span class="text-[10px] font-bold text-slate-400 border border-slate-300 rounded px-1.5 py-0.5">신규</span>
+          <p class="text-sm font-bold text-slate-900">참가신청 페이지 글자 크기 수정</p>
+          <span class="text-[11px] text-slate-400">디자인 작업</span>
+          <span class="ml-auto flex items-center gap-2 flex-wrap">
+            <span class="text-[11px] text-slate-500">수</span>
+            <span class="text-[11px] font-bold text-slate-500 bg-slate-100 border-slate-200 border rounded-full px-2.5 py-0.5 whitespace-nowrap">착수 대기</span>
+            <span class="text-[11px] font-bold text-slate-600 bg-white border-slate-200 border rounded-md px-2 py-0.5 whitespace-nowrap">7월 초</span>
+          </span>
+        </div>
+        <p class="mt-1.5 text-xs text-slate-600">다음 액션 · <strong class="text-slate-900">신청서 화면 기준으로 글자 크기 통일</strong></p>
+      </div>
+      <div class="task-row py-4 border-b border-slate-100" data-scope="home">
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="text-[10px] font-bold text-blue-700 bg-blue-50 border border-blue-200 rounded px-1.5 py-0.5">홈페이지</span><span class="text-[10px] font-bold text-slate-400 border border-slate-300 rounded px-1.5 py-0.5">신규</span>
+          <p class="text-sm font-bold text-slate-900">23회차 참가신청서</p>
+          <span class="text-[11px] text-slate-400">킨텍스 · 27년 3월 행사</span>
+          <span class="ml-auto flex items-center gap-2 flex-wrap">
+            <span class="text-[11px] text-slate-500">데이먼 · 수</span>
+            <span class="text-[11px] font-bold text-slate-500 bg-slate-100 border-slate-200 border rounded-full px-2.5 py-0.5 whitespace-nowrap">대기</span>
+            <span class="text-[11px] font-bold text-slate-600 bg-white border-slate-200 border rounded-md px-2 py-0.5 whitespace-nowrap">8월 제작</span> <span class="text-[11px] font-bold text-slate-600 bg-white border-slate-200 border rounded-md px-2 py-0.5 whitespace-nowrap">9월 신청 시작</span>
+          </span>
+        </div>
+        <p class="mt-1.5 text-xs text-slate-600">다음 액션 · 8월 1주 <strong class="text-slate-900">멀티 브랜드 허용 정책 결정</strong> 후 제작 착수</p>
+        <details class="mt-1.5">
+          <summary class="text-[11px] font-bold text-blue-600">자세히 보기</summary>
+          <div class="mt-2 space-y-1 text-xs text-slate-500 leading-relaxed"><p>⏳ 계약금 토스 결제를 신청 과정에 내장</p><p>⏳ 기업은 입금 즉시 세금계산서 연계</p><p>⚠️ 한 기업이 여러 브랜드로 신청하는 사례(6/16) — 현재는 브랜드별 계정 안내로 임시 대응 중</p></div>
+        </details>
+      </div>
+      <div class="task-row py-4 border-b border-slate-100" data-scope="both">
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="text-[10px] font-bold text-blue-700 bg-blue-50 border border-blue-200 rounded px-1.5 py-0.5">홈페이지</span><span class="text-[10px] font-bold text-slate-700 bg-white border border-slate-300 rounded px-1.5 py-0.5">어드민</span>
+          <p class="text-sm font-bold text-slate-900">증빙서류 자동 발행</p>
+          <span class="text-[11px] text-slate-400">세금계산서·현금영수증 (바로빌)</span>
+          <span class="ml-auto flex items-center gap-2 flex-wrap">
+            <span class="text-[11px] text-slate-500">데이먼</span>
+            <span class="text-[11px] font-bold text-slate-500 bg-slate-100 border-slate-200 border rounded-full px-2.5 py-0.5 whitespace-nowrap">선행 대기</span>
+            <span class="text-[11px] font-bold text-slate-600 bg-white border-slate-200 border rounded-md px-2 py-0.5 whitespace-nowrap">8/17 주 착수</span> <span class="text-[11px] font-bold text-slate-600 bg-white border-slate-200 border rounded-md px-2 py-0.5 whitespace-nowrap">9월 말 가동</span>
+          </span>
+        </div>
+        <p class="mt-1.5 text-xs text-slate-600">다음 액션 · 토스 결제 완료 직후 착수 → 10월 접수 시작 전 가동</p>
+        <details class="mt-1.5">
+          <summary class="text-[11px] font-bold text-blue-600">자세히 보기</summary>
+          <div class="mt-2 space-y-1 text-xs text-slate-500 leading-relaxed"><p>✅ 바로빌 파트너 등록 (6/27)</p><p>✅ 발행 채널 바로빌 일원화 확정 (6/26 토스 공식 답변)</p><p>⏳ 신청 화면(홈페이지) + 처리 화면(어드민) + 기업 즉시 자동 발행 + 사무국 알림·건수</p><p>⚠️ 토스 자동 현금영수증 끄기 설정, 세금계산서 전환 시 취소 절차 화면 반영</p></div>
+        </details>
+        <div class="mt-2 bg-orange-50 border border-orange-200 rounded-lg px-3 py-2 text-xs text-slate-700">📌 <strong class="text-slate-900">실장님 승인 필요</strong> — 완성 시점이 기존 계획(7월 말)보다 늦은 9월 말로 조정됩니다.</div>
+      </div>
+      <div class="task-row py-4 border-b border-slate-100" data-scope="admin">
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="text-[10px] font-bold text-slate-700 bg-white border border-slate-300 rounded px-1.5 py-0.5">어드민</span>
+          <p class="text-sm font-bold text-slate-900">환불·환급 관리</p>
+          <span class="text-[11px] text-slate-400">취소·초과 입금 돌려주기</span>
+          <span class="ml-auto flex items-center gap-2 flex-wrap">
+            <span class="text-[11px] text-slate-500">8월 초 배정</span>
+            <span class="text-[11px] font-bold text-slate-500 bg-slate-100 border-slate-200 border rounded-full px-2.5 py-0.5 whitespace-nowrap">대기</span>
+            <span class="text-[11px] font-bold text-slate-600 bg-white border-slate-200 border rounded-md px-2 py-0.5 whitespace-nowrap">8월 초 착수</span> <span class="text-[11px] font-bold text-slate-600 bg-white border-slate-200 border rounded-md px-2 py-0.5 whitespace-nowrap">9월 초 완성</span>
+          </span>
+        </div>
+        <p class="mt-1.5 text-xs text-slate-600">다음 액션 · 8월 초 <strong class="text-slate-900">담당 배정 후 착수</strong> — 23회차 오픈 전 필수</p>
+        <details class="mt-1.5">
+          <summary class="text-[11px] font-bold text-blue-600">자세히 보기</summary>
+          <div class="mt-2 space-y-1 text-xs text-slate-500 leading-relaxed"><p>✅ 세부 계획 문서 준비 완료</p><p>⏳ 해약금 계산·환불 처리·초과 입금 반환·자동 이력 기록</p></div>
+        </details>
+      </div>
+      <div class="task-row py-4 border-b border-slate-100" data-scope="home">
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="text-[10px] font-bold text-blue-700 bg-blue-50 border border-blue-200 rounded px-1.5 py-0.5">홈페이지</span><span class="text-[10px] font-bold text-slate-400 border border-slate-300 rounded px-1.5 py-0.5">신규</span>
+          <p class="text-sm font-bold text-slate-900">타이페이 행사 준비</p>
+          <span class="text-[11px] text-slate-400">참가자 명단 + 중국어 도면</span>
+          <span class="ml-auto flex items-center gap-2 flex-wrap">
+            <span class="text-[11px] text-slate-500">데이먼 · 수</span>
+            <span class="text-[11px] font-bold text-slate-500 bg-slate-100 border-slate-200 border rounded-full px-2.5 py-0.5 whitespace-nowrap">대기</span>
+            <span class="text-[11px] font-bold text-slate-600 bg-white border-slate-200 border rounded-md px-2 py-0.5 whitespace-nowrap">9월 제작</span> <span class="text-[11px] font-bold text-slate-600 bg-white border-slate-200 border rounded-md px-2 py-0.5 whitespace-nowrap">행사 10/28</span>
+          </span>
+        </div>
+        <p class="mt-1.5 text-xs text-slate-600">다음 액션 · 9월 착수 전 <strong class="text-slate-900">신청서 공개일 확정 필요</strong> (실장님)</p>
+        <details class="mt-1.5">
+          <summary class="text-[11px] font-bold text-blue-600">자세히 보기</summary>
+          <div class="mt-2 space-y-1 text-xs text-slate-500 leading-relaxed"><p>⏳ 확정자 참가자 명단 페이지 · 중국어 부스도면</p><p>⚠️ 확정자용 신청서 공개·공지 시점 미정 (6/10 논의 항목)</p></div>
+        </details>
+      </div>
+      <div class="task-row py-4 border-b border-slate-100" data-scope="home">
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="text-[10px] font-bold text-blue-700 bg-blue-50 border border-blue-200 rounded px-1.5 py-0.5">홈페이지</span>
+          <p class="text-sm font-bold text-slate-900">첫 화면 개선 (2단계)</p>
+          <span class="text-[11px] text-slate-400">1차: 행사 강조+beta 삭제 · 2차: 전면 개편</span>
+          <span class="ml-auto flex items-center gap-2 flex-wrap">
+            <span class="text-[11px] text-slate-500">Colin · 수</span>
+            <span class="text-[11px] font-bold text-slate-500 bg-slate-100 border-slate-200 border rounded-full px-2.5 py-0.5 whitespace-nowrap">대기</span>
+            <span class="text-[11px] font-bold text-slate-600 bg-white border-slate-200 border rounded-md px-2 py-0.5 whitespace-nowrap">1차 9월 중순</span> <span class="text-[11px] font-bold text-slate-600 bg-white border-slate-200 border rounded-md px-2 py-0.5 whitespace-nowrap">2차 11~12월</span>
+          </span>
+        </div>
+        <p class="mt-1.5 text-xs text-slate-600">다음 액션 · 8월 <strong class="text-slate-900">1차 개선 디자인 착수</strong> — 23회차 신청 유입 극대화</p>
+        <details class="mt-1.5">
+          <summary class="text-[11px] font-bold text-blue-600">자세히 보기</summary>
+          <div class="mt-2 space-y-1 text-xs text-slate-500 leading-relaxed"><p>⏳ 1차: 행사 중심 구성 + beta 글자 삭제 (9월 신청 전 반영)</p><p>⏳ 2차: 창작자 플랫폼다운 전면 새 단장 (실장님 로드맵)</p></div>
+        </details>
+      </div>
+      <div class="task-row py-4 border-b border-slate-100" data-scope="both">
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="text-[10px] font-bold text-blue-700 bg-blue-50 border border-blue-200 rounded px-1.5 py-0.5">홈페이지</span><span class="text-[10px] font-bold text-slate-700 bg-white border border-slate-300 rounded px-1.5 py-0.5">어드민</span><span class="text-[10px] font-bold text-slate-400 border border-slate-300 rounded px-1.5 py-0.5">신규</span>
+          <p class="text-sm font-bold text-slate-900">부대시설 신청 기능</p>
+          <span class="text-[11px] text-slate-400">의자·전기·벽체 등 신청+결제(무통장 포함)</span>
+          <span class="ml-auto flex items-center gap-2 flex-wrap">
+            <span class="text-[11px] text-slate-500">데이먼 · 수</span>
+            <span class="text-[11px] font-bold text-slate-500 bg-slate-100 border-slate-200 border rounded-full px-2.5 py-0.5 whitespace-nowrap">대기</span>
+            <span class="text-[11px] font-bold text-slate-600 bg-white border-slate-200 border rounded-md px-2 py-0.5 whitespace-nowrap">9월 중순 착수</span> <span class="text-[11px] font-bold text-slate-600 bg-white border-slate-200 border rounded-md px-2 py-0.5 whitespace-nowrap">10월 말 완성 · 부일페 2주 전</span>
+          </span>
+        </div>
+        <p class="mt-1.5 text-xs text-slate-600">다음 액션 · 9월 중순 착수, <strong class="text-slate-900">10월 말까지 완성</strong> (11월 부일페 필수)</p>
+        <details class="mt-1.5">
+          <summary class="text-[11px] font-bold text-blue-600">자세히 보기</summary>
+          <div class="mt-2 space-y-1 text-xs text-slate-500 leading-relaxed"><p>⏳ 신청자 화면(항목 선택·결제) + 사무국 관리 화면</p><p>✅ 가격 기준: 페어 관리 데이터 재사용으로 제작 기간 단축</p><p>⚠️ 11월 부일페는 미룰 수 없는 날짜</p></div>
+        </details>
+      </div>
+      <div class="task-row py-4 border-b border-slate-100" data-scope="none">
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="text-[10px] font-bold text-slate-500 bg-slate-50 border border-slate-200 rounded px-1.5 py-0.5">운영</span>
+          <p class="text-sm font-bold text-slate-900">증빙서류 신청 접수 운영</p>
+          <span class="text-[11px] text-slate-400">작가: 기간제 · 기업: 마감일만</span>
+          <span class="ml-auto flex items-center gap-2 flex-wrap">
+            <span class="text-[11px] text-slate-500">사무국 · 기획</span>
+            <span class="text-[11px] font-bold text-blue-700 bg-blue-50 border-blue-200 border rounded-full px-2.5 py-0.5 whitespace-nowrap">방식 확정</span>
+            <span class="text-[11px] font-bold text-slate-600 bg-white border-slate-200 border rounded-md px-2 py-0.5 whitespace-nowrap">10월 운영</span>
+          </span>
+        </div>
+        <p class="mt-1.5 text-xs text-slate-600">다음 액션 · 10월 접수 시작 전 <strong class="text-slate-900">세부 날짜·알림 규칙 확정</strong></p>
+        <details class="mt-1.5">
+          <summary class="text-[11px] font-bold text-blue-600">자세히 보기</summary>
+          <div class="mt-2 space-y-1 text-xs text-slate-500 leading-relaxed"><p>✅ 운영 방식 확정: 작가 시작~마감 / 기업 마감일만</p><p>⏳ 신청 유입 시 사무국 알림 + 어드민 처리 건수 표시 (증빙 기능 개발 범위에 포함)</p></div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- 하단 -->
+  <footer class="text-center pb-6">
+    <div class="inline-flex items-center gap-2 bg-white border border-slate-200 rounded-full px-4 py-2 mb-3">
+      <span class="w-2 h-2 rounded-full bg-blue-600 pulse-dot"></span>
+      <span class="text-[11px] font-bold text-slate-500">자료 출처: 개발팀 업무기록(지라) · 팀 메신저(슬랙) · 카카오톡 대화 <span class="text-slate-400 font-medium">(7/4 기준)</span></span>
+    </div>
+    <p class="text-[11px] text-slate-400">본 자료는 개발팀 업무기록(지라), 팀 메신저(슬랙), 카카오톡 대화 내용, 토스페이먼츠 공식 답변(6/26)과 2026년 7월 4일 일정 협의 결과를 기획자가 종합 정리한 것입니다. · 문의: ocreohello@gmail.com</p>
+  </footer>
+
+  </main>
+</div>
+</div>
+
+<script>
+// ===================== 월별 캘린더 =====================
+const J = (k) => `<a href="https://ocreo.atlassian.net/browse/${k}" target="_blank" class="font-bold underline decoration-2 decoration-white/40">${k}</a>`;
+
+// 주차별 할 일: key = 그 주 월요일 날짜
+const weekTasks = {
+  '2026-06-29': [
+    { c:'blue', t:'[홈페이지] 부스도면 최종 점검 → 7/5 미리 공개 <span class="opacity-75">(데이먼)</span>' },
+    { c:'emerald',t:'[어드민] 사무국 화면 1차 배포 (7/5 일) — <strong>참가자 확정 현황 대시보드</strong> 포함 <span class="opacity-75">(데이먼·수)</span>' },
+    { c:'blue', t:'[홈페이지] 참가신청 페이지 글자 크기 수정 착수 <span class="opacity-75">(수 · 티켓 예정)</span>' },
+  ],
+  '2026-07-06': [
+    { c:'slate',  t:'[어드민] 안정화 주간 — 배포 직후 오류 관찰·수정. 참가자 확정 현황은 이번 주보다 다음 주 확인 권장' },
+    { c:'amber',  t:'[어드민] 페어 관리 개발 시작 — 부스 타입별 가격·부대시설 항목 관리. 정산 가격 기능의 선행 작업 <span class="opacity-75">(데이먼·수 · 티켓 예정)</span>' },
+    { c:'blue', t:'[어드민] 정산 관리 1단계 시작 — 현재 화면에서 가능한 범위 먼저: 목록 '+J('OCH-1432')+' · 상세 '+J('OCH-1433')+' <span class="opacity-75">(수)</span>' },
+    { c:'blue', t:'[어드민] 기업 정보를 별도로 만드는 구조 개선 '+J('OCH-1452')+' — 여러 브랜드 참가 문제의 해결 기반 <span class="opacity-75">(데이먼)</span>' },
+  ],
+  '2026-07-13': [
+    { c:'emerald',t:'[어드민] 👀 실장님, 참가자 확정 현황 대시보드 확인 추천 시점 — 안정화 완료 후' },
+    { c:'amber',  t:'[홈페이지] 토스 퀵계좌이체·가상계좌 연동 시작 — 토스 데이터 형태에 따라 정산 화면 설계가 달라져 동시 진행 <span class="opacity-75">(데이먼 · 티켓 예정)</span>' },
+    { c:'blue', t:'[어드민] 참가자 검색·동명이인 구분 '+J('OCH-1435')+' — 현재 화면 가능 범위' },
+  ],
+  '2026-07-20': [
+    { c:'blue', t:'[어드민] 무통장·해외송금 직접 기록 '+J('OCH-1422')+' · 입금 상태 수동 변경 '+J('OCH-1436') },
+    { c:'slate',  t:'행사 최종 점검 — 사이트·도면·티켓 판매 흐름' },
+  ],
+  '2026-07-27': [
+    { c:'rose',   t:'🎪 서일페 21회차 행사 (7/30~8/2) — 새 개발 작업 중단, 전원 현장·사이트 이슈 대응' },
+  ],
+  '2026-08-03': [
+    { c:'slate',  t:'행사 마무리 정리 — 행사 중 이슈 처리, 결과 데이터 정리' },
+    { c:'amber',  t:'[어드민] 페어 관리 완성 목표 — 부스 가격·부대시설 항목 관리. 완성되어야 정산 가격 기능 착수 가능' },
+    { c:'amber',  t:'[홈페이지] 23회차 신청서 설계 시작 — 한 기업 여러 브랜드 허용 여부 이번 주 결정 <span class="opacity-75">(데이먼·수 · 티켓 예정)</span>' },
+    { c:'blue', t:'[어드민] 환불·환급 담당 배정 — '+J('OCH-1447')+' 등 5건 일정 확정' },
+  ],
+  '2026-08-10': [
+    { c:'amber',  t:'[홈페이지] 토스 퀵계좌이체·가상계좌 완성 목표 <span class="opacity-75">(데이먼)</span>' },
+    { c:'blue', t:'[어드민] 정산 관리 2단계 — 가격 자동 계산 '+J('OCH-1434')+' · 수량·부스 수정 '+J('OCH-1438')+' (페어 관리 데이터와 연결)' },
+    { c:'blue', t:'[홈페이지] 23회차 신청서 화면 제작 <span class="opacity-75">(수)</span>' },
+  ],
+  '2026-08-17': [
+    { c:'amber',  t:'[홈페이지·어드민] 증빙서류 자동 발행 제작 시작 — 발행 기록 '+J('OCH-1437')+' + 신청 화면·자동발행·알림 <span class="opacity-75">(데이먼 · 일부 티켓 예정)</span>' },
+    { c:'blue', t:'[어드민] 정산 관리 전체 완성 목표 — 전체 묶음 '+J('OCH-1424') },
+    { c:'blue', t:'[어드민] 환불·환급 제작 — 환급 목록 '+J('OCH-1447')+' · 환급 상세 '+J('OCH-1448') },
+    { c:'slate',  t:'[홈페이지] 첫 화면 1차 개선 디자인 <span class="opacity-75">(Colin)</span>' },
+  ],
+  '2026-08-24': [
+    { c:'blue', t:'[어드민] 환급 처리 — 토스 자동 환급·직접 이체 '+J('OCH-1449')+' · 화면 이동 '+J('OCH-1450')+' · 자동 기록 '+J('OCH-1451') },
+    { c:'blue', t:'[홈페이지] 23회차 신청서 + 토스 결제 연결 테스트' },
+    { c:'slate',  t:'9월 담당 배분 재점검 회의 — 타이페이 추가 반영 <span class="opacity-75">(기획)</span>' },
+  ],
+  '2026-08-31': [
+    { c:'blue', t:'[어드민] 환불·환급 완성 — 신청 시작 전 완료 '+J('OCH-1447')+'~'+J('OCH-1451') },
+    { c:'blue', t:'[홈페이지] 23회차 신청서 완성·최종 테스트' },
+  ],
+  '2026-09-07': [
+    { c:'blue', t:'[홈페이지] 첫 화면 1차 개선 적용 — 행사 강조 + beta 글자 삭제 <span class="opacity-75">(수 · 티켓 예정)</span>' },
+    { c:'blue', t:'[홈페이지] 타이페이 준비 시작 — 참가자 명단·중국어 도면 <span class="opacity-75">(데이먼·수 · 티켓 예정)</span>' },
+  ],
+  '2026-09-14': [
+    { c:'rose',   t:'🚀 23회차 참가신청 시작 — 계약금 토스 결제 가동 (정확한 날짜는 실장님과 확정)' },
+    { c:'amber',  t:'[홈페이지·어드민] 증빙서류 자동 발행 마무리 — 기업 입금 즉시 세금계산서 실제 확인' },
+    { c:'slate',  t:'[홈페이지·어드민] 부대시설 신청 설계 시작 — 의자·전기·벽체 항목·가격 정리 <span class="opacity-75">(기획 · 티켓 예정)</span>' },
+  ],
+  '2026-09-21': [
+    { c:'blue', t:'[홈페이지·어드민] 증빙서류 기능 완성 점검 — 사무국 알림·처리 건수 표시까지 확인' },
+    { c:'blue', t:'[홈페이지] 타이페이 중국어 도면·명단 제작 계속' },
+    { c:'blue', t:'[홈페이지·어드민] 부대시설 신청 개발 착수 — 가격 계산 '+J('OCH-1434')+' 재활용' },
+  ],
+  '2026-09-28': [
+    { c:'emerald',t:'증빙서류 신청 접수 시작(작가) — 사무국 알림 + 처리 건수 표시 가동' },
+    { c:'blue', t:'[홈페이지·어드민] 부대시설 신청·결제 화면 제작 <span class="opacity-75">(데이먼·수)</span>' },
+  ],
+  '2026-10-05': [
+    { c:'blue', t:'[홈페이지·어드민] 부대시설 결제(토스+무통장) 연결' },
+    { c:'slate',  t:'[홈페이지] 타이페이 최종 점검 — 명단·중국어 도면 공개 준비' },
+  ],
+  '2026-10-12': [
+    { c:'blue', t:'[홈페이지·어드민] 부대시설 신청 기능 테스트 — 사무국과 실제 시나리오 점검' },
+    { c:'slate',  t:'타이페이 행사 지원 준비' },
+  ],
+  '2026-10-19': [
+    { c:'blue', t:'[홈페이지·어드민] 부대시설 완성 단계 — 부일페 2주 전 완료 목표' },
+    { c:'slate',  t:'타이페이 행사 최종 준비' },
+  ],
+  '2026-10-26': [
+    { c:'rose',   t:'🎪 타이페이 행사 (10/28) — 현장·사이트 이슈 대응' },
+    { c:'blue', t:'[홈페이지·어드민] 부대시설 신청 기능 완성' },
+    { c:'emerald',t:'증빙서류 신청 마감 처리 (작가·기업) — 미처리 건 정리' },
+  ],
+  '2026-11-02': [
+    { c:'emerald',t:'부대시설 신청 실사용 시작·모니터링 — 부일페 확정자 대상' },
+    { c:'slate',  t:'[홈페이지] 2차 전면 개편 기획·디자인 시작 <span class="opacity-75">(Colin·기획 · 티켓 예정)</span>' },
+  ],
+  '2026-11-09': [
+    { c:'slate',  t:'부일페 준비 지원 (행사 날짜 확정 필요)' },
+  ],
+  '2026-11-16': [
+    { c:'rose',   t:'🎪 부일페 행사 지원 (날짜 확정 후 이 주가 아닐 수 있음)' },
+    { c:'slate',  t:'[홈페이지] 2차 개편 디자인 진행' },
+  ],
+  '2026-11-23': [
+    { c:'blue', t:'[홈페이지] 2차 개편 디자인 확정 → 개발 착수' },
+  ],
+  '2026-11-30': [
+    { c:'blue', t:'[홈페이지] 2차 전면 개편 개발 <span class="opacity-75">(수·데이먼)</span>' },
+  ],
+  '2026-12-07': [
+    { c:'slate',  t:'증빙·입금 데이터 연말 대조 점검' },
+  ],
+  '2026-12-14': [
+    { c:'blue', t:'[홈페이지] 새 첫 화면 공개 — 연말·연초 방문자 대상' },
+  ],
+  '2026-12-21': [
+    { c:'slate',  t:'27년 상반기 계획 수립 — 23회차(27년 3월 킨텍스) 준비 일정 확정 <span class="opacity-75">(기획)</span>' },
+  ],
+};
+
+// 특별한 날 표시
+const specialDays = {
+  '2026-07-05': { label:'배포·공개', cls:'bg-blue-100 text-blue-800 ring-1 ring-blue-300' },
+  '2026-07-06': { label:'도면 공개', cls:'bg-blue-600 text-white' },
+  '2026-07-30': { label:'행사', cls:'bg-slate-900 text-white' },
+  '2026-07-31': { label:'행사', cls:'bg-slate-900 text-white' },
+  '2026-08-01': { label:'행사', cls:'bg-slate-900 text-white' },
+  '2026-08-02': { label:'행사', cls:'bg-slate-900 text-white' },
+  '2026-10-28': { label:'타이페이', cls:'bg-blue-700 text-white' },
+};
+const TODAY = '2026-07-04';
+
+// 월 헤더는 DESIGN.md 규칙에 따라 primary 단일 색으로 통일 (색은 상태 신호로만 사용)
+const months = [
+  { y:2026, m:6,  id:'cal-7',  title:'2026년 7월',  head:'bg-[#F1F3F5] border-b border-slate-200',  note:'🎪 7/30~8/2 서일페 21회차 (코엑스 C홀) · 7/6 부스도면 공개' },
+  { y:2026, m:7,  id:'cal-8',  title:'2026년 8월',  head:'bg-[#F1F3F5] border-b border-slate-200',  note:'일이 가장 몰리는 달 — 급하지 않은 수정 요청은 잠시 보류' },
+  { y:2026, m:8,  id:'cal-9',  title:'2026년 9월',  head:'bg-[#F1F3F5] border-b border-slate-200',  note:'🚀 23회차 참가신청 시작 (토스 계약금 + 기업 즉시 세금계산서)' },
+  { y:2026, m:9,  id:'cal-10', title:'2026년 10월', head:'bg-[#F1F3F5] border-b border-slate-200',  note:'🎪 10/28 타이페이 행사 · 증빙서류 접수 시작' },
+  { y:2026, m:10, id:'cal-11', title:'2026년 11월', head:'bg-[#F1F3F5] border-b border-slate-200',  note:'🎪 부일페 행사 (날짜 확정 필요) · 부대시설 신청 첫 사용' },
+  { y:2026, m:11, id:'cal-12', title:'2026년 12월', head:'bg-[#F1F3F5] border-b border-slate-200',  note:'홈페이지 새 단장 마무리 · 한 해 정리' },
+];
+
+const chipCls = {
+  indigo:  'bg-[#E8EFFE] text-[#333D4B]',                          // 개발 일반: 연한 파스텔 면
+  amber:   'bg-white border border-blue-700 text-blue-900',        // 최우선: 테두리 선 강조
+  slate:   'bg-white border border-slate-200 text-slate-500',      // 운영: 옅은 테두리만
+  rose:    'bg-slate-900 text-white',                              // 행사(핵심 마일스톤): 면 채움
+  emerald: 'bg-blue-600 text-white',                               // 배포·가동(핵심 마일스톤): 면 채움
+};
+
+function fmt(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+
+function buildMonth(cfg){
+  const first = new Date(cfg.y, cfg.m, 1);
+  const last  = new Date(cfg.y, cfg.m+1, 0);
+  // 월요일 시작
+  let start = new Date(first);
+  start.setDate(first.getDate() - ((first.getDay()+6)%7));
+
+  let weeksHtml = '';
+  let cur = new Date(start);
+  let wIdx = 1;
+  while (cur <= last) {
+    const monday = new Date(cur);
+    const days = [];
+    for (let i=0;i<7;i++){ days.push(new Date(cur)); cur.setDate(cur.getDate()+1); }
+    const sunday = days[6];
+    const key = fmt(monday);
+    const tasks = weekTasks[key] || [];
+
+    const dayCells = days.map(d=>{
+      const inMonth = d.getMonth()===cfg.m;
+      const k = fmt(d);
+      const sp = specialDays[k];
+      const isToday = k===TODAY;
+      let inner = d.getDate();
+      let cls = 'cal-day flex flex-col items-center justify-center rounded-lg text-[11px] font-bold ' + (inMonth? 'text-slate-700':'text-slate-300');
+      if (sp && inMonth) cls += ' ' + sp.cls;
+      if (isToday) cls += ' ring-2 ring-slate-900';
+      const lbl = (sp && inMonth) ? `<span class="text-[8px] font-black leading-none mt-0.5">${sp.label}</span>` : '';
+      return `<div class="${cls}">${inner}${lbl}</div>`;
+    }).join('');
+
+    const chips = tasks.map(t=>`<div class="chip rounded-lg px-2.5 py-1.5 text-[11px] font-bold leading-snug ${chipCls[t.c]}">${t.t}</div>`).join('');
+
+    weeksHtml += `
+      <div class="grid grid-cols-[70px_1fr] gap-3 px-4 py-3 ${tasks.some(t=>t.c==='rose')?'bg-slate-100/50':''}">
+        <div>
+          <p class="text-[11px] font-black text-slate-500">${wIdx}주차</p>
+          <p class="text-[10px] text-slate-400">${monday.getMonth()+1}/${monday.getDate()}–${sunday.getMonth()+1}/${sunday.getDate()}</p>
+        </div>
+        <div>
+          <div class="grid grid-cols-7 gap-1 mb-1.5">${dayCells}</div>
+          <div class="space-y-1">${chips || '<p class="text-[11px] text-slate-300 font-medium">예정된 작업 없음</p>'}</div>
+        </div>
+      </div>`;
+    wIdx++;
+  }
+
+  return `
+    <div id="${cfg.id}" class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden" style="scroll-margin-top:24px;">
+      <div class="flex flex-wrap items-center justify-between gap-2 ${cfg.head} px-5 py-3">
+        <p class="text-sm font-black text-slate-900">${cfg.title}</p>
+        <p class="text-[11px] font-bold text-slate-500">${cfg.note}</p>
+      </div>
+      <div class="grid grid-cols-[70px_1fr] gap-3 px-4 pt-3">
+        <div></div>
+        <div class="grid grid-cols-7 gap-1 text-center text-[10px] font-black text-slate-400">
+          <span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span class="text-blue-500">토</span><span class="text-slate-700">일</span>
+        </div>
+      </div>
+      <div class="divide-y divide-slate-100">${weeksHtml}</div>
+    </div>`;
+}
+
+document.getElementById('calRoot').innerHTML = months.map(buildMonth).join('');
+
+// ===================== 사이드 메뉴 · 탭 방식 화면 전환 =====================
+const links = Array.from(document.querySelectorAll('#sideNav a'));
+const VIEW_IDS = ['milestones','summary','timeline','calendar','planning','decisions','tasks'];
+let mode = 'tab';           // 'tab' = 한 번에 한 화면 | 'all' = 전체 스크롤(인쇄용)
+let current = 'timeline'; // 현재 보고 있는 화면 (첫 화면: 월별 일정표)
+
+function sectionOf(id){ return id.startsWith('cal-') ? 'calendar' : id; }
+
+function applyView(){
+  const isAll = mode === 'all';
+  VIEW_IDS.forEach(id=>{
+    const el = document.getElementById(id);
+    if (el) el.style.display = (isAll || id === sectionOf(current)) ? '' : 'none';
+  });
+  // 캘린더는 선택한 달만 표시 (전체 보기에서는 모두 표시)
+  document.querySelectorAll('#calRoot > div').forEach(el=>{
+    el.style.display = (isAll || !current.startsWith('cal-') || el.id === current) ? '' : 'none';
+  });
+  links.forEach(a=>{
+    const href = a.getAttribute('href');
+    a.classList.toggle('active', href === '#'+current || (current.startsWith('cal-') && href === '#calendar'));
+  });
+  const btn = document.getElementById('modeBtn');
+  if (btn) btn.textContent = isAll ? '📑 탭 보기로 돌아가기' : '🖨️ 전체 보기 (인쇄용)';
+}
+
+links.forEach(a=>a.addEventListener('click', e=>{
+  const id = a.getAttribute('href').slice(1);
+  if (mode === 'tab') {
+    e.preventDefault();
+    current = (id === 'calendar') ? 'cal-7' : id;
+    applyView();
+    window.scrollTo({ top: 0 });
+  }
+}));
+
+document.getElementById('modeBtn').addEventListener('click', ()=>{
+  mode = (mode === 'tab') ? 'all' : 'tab';
+  applyView();
+  window.scrollTo({ top: 0 });
+});
+
+// 전체 보기 모드에서만: 스크롤 위치에 따라 메뉴 강조
+const io = new IntersectionObserver((entries)=>{
+  if (mode !== 'all') return;
+  const visible = entries.filter(e=>e.isIntersecting).sort((a,b)=>a.boundingClientRect.top-b.boundingClientRect.top);
+  if (visible.length) {
+    current = visible[0].target.id;
+    links.forEach(a=>a.classList.toggle('active', a.getAttribute('href') === '#'+current));
+  }
+},{ rootMargin:'-10% 0px -70% 0px', threshold:0 });
+VIEW_IDS.forEach(id=>{ const el=document.getElementById(id); if(el) io.observe(el); });
+
+applyView(); // 첫 화면: 월별 일정표
+
+// ===================== 어드민/홈페이지 보기 토글 =====================
+let scope = 'all'; // 'all' | 'admin' | 'home'
+
+function scopeMatches(text){
+  if (scope === 'all') return true;
+  const both = text.includes('[홈페이지·어드민]');
+  if (!text.includes('[')) return true; // 말머리 없는 항목(행사·운영)은 항상 표시
+  if (scope === 'admin') return both || text.includes('[어드민]');
+  return both || text.includes('[홈페이지]');
+}
+
+function applyScope(){
+  document.querySelectorAll('#scopeToggle .scope-btn').forEach(b=>
+    b.classList.toggle('active', b.dataset.scope === scope));
+  // 월별 일정표 행
+  document.querySelectorAll('#timeline .relative > .grid').forEach(row=>{
+    const p = row.querySelector('p');
+    if (p) row.style.display = scopeMatches(p.textContent) ? '' : 'none';
+  });
+  // 월별 캘린더 칩
+  document.querySelectorAll('#calRoot .chip').forEach(ch=>{
+    ch.style.display = scopeMatches(ch.textContent) ? '' : 'none';
+  });
+  // 기획 일정 표
+  document.querySelectorAll('#planning tbody tr').forEach(tr=>{
+    const p = tr.querySelector('td p');
+    if (p) tr.style.display = scopeMatches(p.textContent) ? '' : 'none';
+  });
+  // 할 일 상세 목록 (data-scope 기반)
+  document.querySelectorAll('#tasks .task-row').forEach(r=>{
+    const sc = r.dataset.scope || 'none';
+    const show = (scope === 'all') || sc === 'none' || sc === 'both' || sc === scope;
+    r.style.display = show ? '' : 'none';
+  });
+}
+
+document.querySelectorAll('#scopeToggle .scope-btn').forEach(b=>
+  b.addEventListener('click', ()=>{ scope = b.dataset.scope; applyScope(); }));
+
+// 인쇄 시에는 항상 전체 표시
+window.addEventListener('beforeprint', ()=>{ scope = 'all'; applyScope(); });
+</script>
+
+</body>
+</html>
