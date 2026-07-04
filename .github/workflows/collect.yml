@@ -1,0 +1,32 @@
+name: 일요일 밤 답글 수집 → 대시보드 갱신·배포
+
+on:
+  schedule:
+    - cron: '0 13 * * 0'    # 일요일 22:00 KST (UTC 13:00)
+  workflow_dispatch: {}      # 수동 실행 버튼
+
+permissions:
+  contents: write
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests anthropic
+      - name: 답글 수집 및 대시보드 갱신
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_USER_ID: ${{ secrets.SLACK_USER_ID }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          PAGES_URL: https://yejinshin95-jpg.github.io/ocreo-dashboard/
+        run: python scripts/collect.py
+      - name: 변경분 커밋·배포
+        run: |
+          git config user.name "ocreo-bot"
+          git config user.email "actions@github.com"
+          git add index.html
+          git diff --cached --quiet && echo "변경 없음 — 배포 생략" || (git commit -m "주간 브리핑 자동 갱신 $(date +%F)" && git push)

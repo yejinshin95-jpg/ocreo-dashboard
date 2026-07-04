@@ -1,0 +1,21 @@
+name: 일요일 저녁 진행 상황 질문 (슬랙)
+
+on:
+  schedule:
+    - cron: '30 10 * * 0'   # 일요일 19:30 KST (UTC 10:30)
+  workflow_dispatch: {}      # 수동 실행 버튼
+
+jobs:
+  ask:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: 슬랙 질문 전송
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_USER_ID: ${{ secrets.SLACK_USER_ID }}
+        run: python scripts/ask.py
