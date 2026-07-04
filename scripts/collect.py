@@ -10,7 +10,7 @@ H = {"Authorization": f"Bearer {TOKEN}"}
 
 
 def slack(method, **kw):
-    r = requests.post(f"https://slack.com/api/{method}", headers=H, data=kw).json()
+    r = requests.post(f"https://slack.com/api/{method}", headers=H, params=kw).json()
     if not r.get("ok"):
         raise SystemExit(f"슬랙 오류({method}): {r.get('error')}")
     return r
