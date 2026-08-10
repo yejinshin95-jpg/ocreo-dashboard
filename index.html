@@ -534,8 +534,8 @@ tailwind.config = {
   <!-- 운영 일정 (사무국) -->
   <section id="ops" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-8">
     <div class="mb-4">
-      <h2 class="text-lg font-black text-slate-900">운영 일정 <span class="text-slate-400 font-medium text-sm">· 회차마다 반복되는 사무국 10단계</span></h2>
-      <p class="text-xs text-slate-400 mt-1">실장님 제공 자료(8/10)를 옮긴 것입니다. 페어 한 회차는 <strong class="text-slate-500">①오픈부터 행사까지 약 12개월</strong>이 걸리고, 회차마다 같은 순서를 시작 월만 달리해 반복합니다. 가로로 스크롤하면 12개월 전체가 보입니다.</p>
+      <h2 class="text-lg font-black text-slate-900">페어 운영 일정 <span class="text-slate-400 font-medium text-sm">· 부일페 V.7 · 서일페 V.22</span></h2>
+      <p class="text-xs text-slate-400 mt-1">지금 운영 중인 두 회차의 남은 일정입니다. 실장님 제공 운영일정(8/10)의 10단계를 각 회차 행사일에 맞춰 배치했습니다. 페어 한 회차는 <strong class="text-slate-500">①오픈부터 행사까지 약 10~12개월</strong>이 걸립니다.</p>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-5">
@@ -554,26 +554,18 @@ tailwind.config = {
     </div>
 
     <div class="bg-orange-50 border-2 border-orange-300 rounded-xl p-3.5 mb-5">
-      <p class="text-[11px] font-black text-orange-800 tracking-wider mb-2">🔴 지금(8/10) 각 페어가 서 있는 단계</p>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5">
-        <div class="bg-white border border-orange-200 rounded-lg p-2.5">
-          <p class="text-xs font-black text-slate-900 mb-0.5">부일페 V.7 <span class="text-[10px] font-bold text-slate-400">· 2026년 11월 행사</span></p>
-          <p class="text-xs text-slate-700 leading-relaxed"><span class="font-bold text-orange-800">④ 잔금 마감 — 이번 달입니다.</span> 잔금은 토스로 받기로 되어 있는데 <strong class="text-orange-800">토스 연동이 아직 미착수</strong>입니다. 11월 ⑦부대시설도 토스입니다.</p>
-        </div>
-        <div class="bg-white border border-slate-200 rounded-lg p-2.5">
-          <p class="text-xs font-black text-slate-900 mb-0.5">23회차 <span class="text-[10px] font-bold text-slate-400">· 2027년 여름 행사</span></p>
-          <p class="text-xs text-slate-700 leading-relaxed"><span class="font-bold text-blue-700">① 오픈 준비 중</span> — 8월말~9월 오픈 예정. ②계약금은 <strong class="text-slate-900">무통장</strong>이라 토스가 필요 없고, <strong class="text-slate-900">④잔금은 2027년 4월</strong>이라 8개월 남았습니다.</p>
-        </div>
+      <p class="text-[11px] font-black text-orange-800 tracking-wider mb-2">🔴 이번 달(8월)에 사무국이 해야 하는 일</p>
+      <div class="bg-white border border-orange-200 rounded-lg p-3">
+        <p class="text-xs font-black text-slate-900 mb-1">부일페 V.7 — ④ 잔금 마감</p>
+        <p class="text-xs text-slate-700 leading-relaxed">운영일정상 잔금은 <strong class="text-slate-900">토스</strong>로 받게 되어 있는데 <strong class="text-orange-800">토스 연동이 아직 착수되지 않았습니다.</strong> 이번 회차는 잔금도 무통장으로 받거나 마감을 늦춰야 합니다 — <strong class="text-orange-800">실장님 결정이 필요한 사항</strong>입니다.</p>
+        <p class="text-[11px] text-slate-500 leading-relaxed mt-1.5">같은 단계에 <strong class="text-slate-600">페어스토리 오픈 · 티켓 판매</strong>도 함께 걸려 있습니다. 티켓은 현재 네이버 예매로 나가고 있습니다.</p>
       </div>
+      <p class="text-[11px] text-slate-600 leading-relaxed mt-2.5">다음 토스 필요 시점은 <strong class="text-slate-800">서일페 V.22 ④잔금(9월 예정)</strong>과 <strong class="text-slate-800">부일페 V.7 ⑦부대시설(11월)</strong>입니다. 두 회차의 잔금·부대시설이 9~12월에 몰려 있어, 토스는 늦어도 <strong class="text-slate-800">10월 안에는 준비되어야</strong> 합니다.</p>
     </div>
 
     <div class="overflow-x-auto -mx-1 px-1">
-      <div class="min-w-[900px]">
-        <div class="grid text-center text-[11px] font-bold text-slate-400 pb-2 border-b border-slate-200" style="grid-template-columns: 132px repeat(12, 1fr);">
-          <div></div>
-          <div>1월</div><div>2월</div><div>3월</div><div>4월</div><div>5월</div><div>6월</div>
-          <div>7월</div><div>8월</div><div>9월</div><div>10월</div><div>11월</div><div>12월</div>
-        </div>
+      <div class="min-w-[820px]">
+        <div id="opsHead" class="grid pb-1 border-b border-slate-200"></div>
         <div id="opsRows"></div>
       </div>
     </div>
@@ -1169,78 +1161,103 @@ const specialDays = {
 const TODAY = '2026-08-10';
 
 // ===================== 운영 일정 (사무국 10단계) =====================
-// 실장님 제공 자료(8/10) 기준. m = 월(1~12), s = 단계 번호, t = 라벨.
-// toss:true 인 단계는 토스 결제가 붙는 구간(④잔금 · ⑦부대시설).
+// 실장님 제공 운영일정(8/10)의 10단계를, 현재 운영 중인 두 회차에 대입한 것.
+// 축은 지금(2026-08)부터 두 회차가 끝나는 2027-02까지 7개월.
+const OPS_MONTHS = [
+  { key:'2026-08', y:'2026년', m:'8월' },
+  { key:'2026-09', y:'',       m:'9월' },
+  { key:'2026-10', y:'',       m:'10월' },
+  { key:'2026-11', y:'',       m:'11월' },
+  { key:'2026-12', y:'',       m:'12월' },
+  { key:'2027-01', y:'2027년', m:'1월' },
+  { key:'2027-02', y:'',       m:'2월' },
+];
+
+// toss:true = 토스 결제가 붙는 단계(④잔금 · ⑦부대시설)
+// est:true  = 실장님 운영일정의 사이클로 역산한 추정치 (확인 필요)
 const OPS_FAIRS = [
-  { name:'SIF21', tone:'rose', event:{ m:8, label:'SIF21' }, steps:[
-    { m:4,  s:'④', t:'잔금, 페어스토리<br>티켓판매', toss:true },
-    { m:5,  s:'⑤', t:'부스배정, 바이어등록' },
-    { m:6,  s:'⑥', t:'kit발송, 도면' },
-    { m:7,  s:'⑦', t:'부대시설', toss:true },
-    { m:8,  s:'⑧⑨', t:'현장매뉴얼<br>증빙발행·결과보고' },
-    { m:9,  s:'①', t:'오픈' },
-    { m:10, s:'②', t:'확정대기입금' },
-    { m:11, s:'③', t:'포트폴리오' },
-  ]},
-  { name:'BIF6', tone:'amber', steps:[
-    { m:1,  s:'①', t:'오픈' },
-    { m:2,  s:'②', t:'확정대기입금' },
-    { m:3,  s:'③', t:'포트폴리오' },
-    { m:8,  s:'④', t:'잔금, 페어스토리<br>티켓판매', toss:true },
-    { m:9,  s:'⑤', t:'부스배정, 바이어등록' },
-    { m:10, s:'⑥', t:'kit발송, 도면' },
-    { m:11, s:'⑦', t:'부대시설', toss:true },
-    { m:12, s:'⑧⑨', t:'현장매뉴얼<br>증빙발행·결과보고' },
-  ]},
-  { name:'SIF20', tone:'sky', steps:[
-    { m:1,  s:'①', t:'오픈' },
-    { m:1,  s:'⑨', t:'증빙발행<br>결과보고' },
-    { m:2,  s:'②', t:'확정대기입금' },
-    { m:3,  s:'③', t:'포트폴리오' },
-    { m:9,  s:'④', t:'잔금, 페어스토리<br>티켓판매', toss:true },
-    { m:10, s:'⑤', t:'부스배정, 바이어등록' },
-    { m:11, s:'⑥', t:'kit발송, 도면' },
-    { m:12, s:'⑦', t:'부대시설', toss:true },
-    { m:12, s:'⑧', t:'현장<br>매뉴얼' },
-  ]},
+  {
+    name:'부일페 V.7', tone:'amber',
+    event:'2026년 11월 (날짜 미확정)',
+    done:'① 오픈(1월) · ② 확정·입금(2월) · ③ 갤러리등록(3월) 완료',
+    steps:[
+      { k:'2026-08', s:'④', t:'잔금 마감<br>페어스토리·티켓판매', toss:true, now:true },
+      { k:'2026-09', s:'⑤', t:'부스배정<br>바이어등록' },
+      { k:'2026-10', s:'⑥', t:'키트발송<br>도면' },
+      { k:'2026-11', s:'⑦', t:'부대시설', toss:true },
+      { k:'2026-12', s:'⑧⑨', t:'현장매뉴얼<br>증빙발행·결과보고' },
+    ],
+    eventAt:'2026-11',
+  },
+  {
+    name:'서일페 V.22', tone:'sky',
+    event:'2026년 12월 ~ 2027년 1월',
+    done:'① 오픈(2월, OCH-1246) · ② 확정·입금(3월) · ③ 갤러리등록(4월) 완료',
+    steps:[
+      { k:'2026-09', s:'④', t:'잔금 마감<br>페어스토리·티켓판매', toss:true, est:true },
+      { k:'2026-10', s:'⑤', t:'부스배정<br>바이어등록', est:true },
+      { k:'2026-11', s:'⑥', t:'키트발송<br>도면', est:true },
+      { k:'2026-12', s:'⑦', t:'부대시설', toss:true, est:true },
+      { k:'2026-12', s:'⑧', t:'현장매뉴얼', est:true },
+      { k:'2027-01', s:'⑨⑩', t:'증빙발행<br>개최결과보고서', est:true },
+    ],
+    eventAt:'2026-12',
+  },
 ];
 
 const OPS_TONE = {
-  rose:  { text:'text-[#D6336C]', badge:'bg-[#F06595] text-white' },
-  amber: { text:'text-[#E8590C]', badge:'bg-[#FD7E14] text-white' },
-  sky:   { text:'text-[#1971C2]', badge:'bg-[#1C7ED6] text-white' },
+  amber: { text:'text-[#E8590C]', badge:'bg-[#FD7E14] text-white', soft:'bg-orange-50' },
+  sky:   { text:'text-[#1971C2]', badge:'bg-[#1C7ED6] text-white', soft:'bg-sky-50' },
 };
 
 (function renderOps(){
   const root = document.getElementById('opsRows');
   if (!root) return;
-  const thisMonth = Number(TODAY.slice(5,7));
+  const nowKey = TODAY.slice(0,7);
+  const cols = `grid-template-columns: 150px repeat(${OPS_MONTHS.length}, 1fr);`;
+
+  // 월 헤더
+  const head = document.getElementById('opsHead');
+  if (head) {
+    head.style.cssText = cols;
+    head.innerHTML = '<div></div>' + OPS_MONTHS.map(mo=>{
+      const isNow = mo.key === nowKey;
+      return `<div class="text-center pb-2 ${isNow ? 'bg-amber-100 rounded-t-lg' : ''}">
+          ${mo.y ? `<p class="text-[9px] font-bold text-slate-400">${mo.y}</p>` : '<p class="text-[9px]">&nbsp;</p>'}
+          <p class="text-[11px] font-black ${isNow ? 'text-amber-800' : 'text-slate-500'}">${mo.m}${isNow ? ' · 지금' : ''}</p>
+        </div>`;
+    }).join('');
+  }
+
   root.innerHTML = OPS_FAIRS.map(f=>{
     const tone = OPS_TONE[f.tone];
-    // 월별로 항목을 모아 한 칸에 여러 개가 와도 겹치지 않게 쌓는다
-    const byMonth = {};
-    f.steps.forEach(st=>{ (byMonth[st.m] = byMonth[st.m] || []).push(st); });
-    if (f.event) (byMonth[f.event.m] = byMonth[f.event.m] || []).unshift({ ev:f.event.label });
+    const byKey = {};
+    f.steps.forEach(st=>{ (byKey[st.k] = byKey[st.k] || []).push(st); });
 
-    const cells = [];
-    for (let m=1; m<=12; m++){
-      const items = byMonth[m] || [];
-      const isNow = m === thisMonth;
-      const body = items.map(it=>{
-        if (it.ev) return `<span class="inline-block text-[10px] font-black rounded-full px-2 py-0.5 mb-1 ${tone.badge}">${it.ev}</span>`;
-        return `<div class="leading-tight mb-1">
-            <span class="text-[10px] font-bold ${tone.text}">${it.s}</span>
-            ${it.toss ? '<span class="text-[9px] font-bold text-white bg-blue-600 rounded px-1 ml-0.5 align-middle">토스</span>' : ''}
-            <p class="text-[10px] font-bold ${tone.text} leading-tight mt-0.5">${it.t}</p>
-          </div>`;
-      }).join('');
-      cells.push(`<div class="px-1.5 py-2 border-l border-slate-100 ${isNow ? 'bg-amber-50' : ''}">${body}</div>`);
-    }
-    return `<div class="grid items-stretch border-b border-slate-100" style="grid-template-columns: 132px repeat(12, 1fr);">
-        <div class="pr-2 py-2 flex items-start">
-          <span class="text-[10px] font-black rounded-full px-2 py-0.5 ${tone.badge}">${f.name}</span>
+    const cells = OPS_MONTHS.map(mo=>{
+      const items = byKey[mo.key] || [];
+      const isNow = mo.key === nowKey;
+      const isEvent = f.eventAt === mo.key;
+      const body = items.map(it=>`
+        <div class="leading-tight mb-1.5 ${it.now ? 'ring-2 ring-orange-400 rounded-md px-1 py-0.5 bg-white' : ''}">
+          <span class="text-[10px] font-black ${tone.text}">${it.s}</span>
+          ${it.toss ? '<span class="text-[9px] font-bold text-white bg-blue-600 rounded px-1 ml-0.5 align-middle">토스</span>' : ''}
+          ${it.est ? '<span class="text-[9px] font-bold text-slate-500 bg-slate-100 border border-slate-300 rounded px-1 ml-0.5 align-middle">추정</span>' : ''}
+          <p class="text-[10px] font-bold ${tone.text} leading-tight mt-0.5">${it.t}</p>
+        </div>`).join('');
+      return `<div class="px-1.5 py-2 border-l border-slate-100 ${isNow ? 'bg-amber-50' : ''}">
+          ${isEvent ? `<span class="inline-block text-[9px] font-black rounded-full px-1.5 py-0.5 mb-1.5 ${tone.badge}">🎪 행사</span>` : ''}
+          ${body}
+        </div>`;
+    }).join('');
+
+    return `<div class="grid items-stretch border-b border-slate-100" style="${cols}">
+        <div class="pr-2 py-2">
+          <span class="inline-block text-[10px] font-black rounded-full px-2 py-0.5 ${tone.badge}">${f.name}</span>
+          <p class="text-[10px] font-bold text-slate-500 mt-1">${f.event}</p>
+          <p class="text-[9px] text-slate-400 leading-tight mt-1">${f.done}</p>
         </div>
-        ${cells.join('')}
+        ${cells}
       </div>`;
   }).join('');
 })();
@@ -1333,7 +1350,8 @@ document.getElementById('calRoot').innerHTML = months.map(buildMonth).join('');
 // ===================== 사이드 메뉴 · 전체 / 신규 기능 / 페어 운영 =====================
 // 섹션을 세 갈래로만 나눈다. risk(지금 막힌 것)는 어느 화면에서든 항상 맨 위에 보인다.
 const VIEW_SECTIONS = {
-  dev: ['milestones','summary','timeline','calendar','planning','decisions','tasks'],
+  // risk·briefing은 개발 쪽 내용이라 '페어 운영 일정'에서는 감춘다
+  dev: ['risk','briefing','milestones','summary','timeline','calendar','planning','decisions','tasks'],
   ops: ['ops'],
 };
 const ALL_SECTIONS = [...VIEW_SECTIONS.dev, ...VIEW_SECTIONS.ops];
