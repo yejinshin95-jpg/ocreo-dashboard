@@ -94,6 +94,26 @@ tailwind.config = {
   /* 캘린더 */
   /* 캘린더 일간 칸: 라벨 유무와 관계없이 모든 달·모든 주에서 동일 크기 */
   .cal-day { height:40px; }
+  /* 월 이동 컨트롤 */
+  .cal-arrow {
+    width:32px; height:32px; flex-shrink:0; border-radius:9px;
+    border:1px solid #E2E8F0; background:#fff; color:#475569;
+    font-size:17px; font-weight:900; line-height:1; cursor:pointer; transition:all .15s;
+  }
+  .cal-arrow:hover:not(:disabled) { background:#EFF6FF; border-color:#BFDBFE; color:#1D4ED8; }
+  .cal-arrow:disabled { opacity:.35; cursor:default; }
+  .cal-tab {
+    position:relative; padding:6px 13px; border-radius:9px;
+    border:1px solid #E2E8F0; background:#fff; color:#64748B;
+    font-size:12px; font-weight:800; cursor:pointer; transition:all .15s;
+  }
+  .cal-tab:hover { background:#F1F5F9; color:#0F172A; }
+  .cal-tab.active { background:#2563EB; border-color:#2563EB; color:#fff; }
+  .cal-tab-dot {
+    position:absolute; top:3px; right:4px; width:5px; height:5px;
+    border-radius:50%; background:#F97316;
+  }
+  .cal-tab.active .cal-tab-dot { background:#FDBA74; }
   details > summary { cursor: pointer; list-style-position: inside; }
   .chip a { text-decoration: underline; text-underline-offset: 2px; text-decoration-color: currentColor; }
   @media print {
@@ -528,7 +548,15 @@ tailwind.config = {
         <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-slate-900"></span>행사·공개일</span>
       </div>
     </div>
-    <div id="calRoot" class="space-y-5"></div>
+
+    <!-- 월 이동: ‹ › 버튼 + 월 칩 -->
+    <div class="flex items-center gap-2 mb-4 flex-wrap">
+      <button id="calPrev" class="cal-arrow" aria-label="이전 달">‹</button>
+      <div id="calTabs" class="flex items-center gap-1 flex-wrap"></div>
+      <button id="calNext" class="cal-arrow" aria-label="다음 달">›</button>
+    </div>
+
+    <div id="calRoot"></div>
   </section>
 
   <!-- 운영 일정 (사무국) -->
@@ -1345,7 +1373,6 @@ function buildMonth(cfg){
     </div>`;
 }
 
-document.getElementById('calRoot').innerHTML = months.map(buildMonth).join('');
 
 // ===================== 사이드 메뉴 · 전체 / 신규 기능 / 페어 운영 =====================
 // 섹션을 세 갈래로만 나눈다. risk(지금 막힌 것)는 어느 화면에서든 항상 맨 위에 보인다.
@@ -1365,8 +1392,6 @@ function applyView(){
     const el = document.getElementById(id);
     if (el) el.style.display = shown.includes(id) ? '' : 'none';
   });
-  // 캘린더는 항상 12개월 전부 표시
-  document.querySelectorAll('#calRoot > div').forEach(el=>{ el.style.display = ''; });
   navItems.forEach(b=> b.classList.toggle('active', b.dataset.view === view));
 }
 
@@ -1422,6 +1447,66 @@ document.querySelectorAll('#scopeToggle .scope-btn').forEach(b=>
 
 // 인쇄 시에는 항상 전체 표시
 window.addEventListener('beforeprint', ()=>{ scope = 'all'; applyScope(); });
+
+// ===================== 캘린더: 한 번에 한 달만 =====================
+(function calendarNav(){
+  const root = document.getElementById('calRoot');
+  const tabs = document.getElementById('calTabs');
+  const prev = document.getElementById('calPrev');
+  const next = document.getElementById('calNext');
+  if (!root) return;
+
+  // 기준일이 속한 달을 첫 화면으로. 없으면 첫 번째 달.
+  const nowMonth = Number(TODAY.slice(5,7));
+  let idx = Math.max(0, months.findIndex(mo => mo.m + 1 === nowMonth));
+
+  function render(){
+    root.innerHTML = buildMonth(months[idx]);
+    if (tabs) {
+      tabs.innerHTML = months.map((mo,i)=>{
+        const isNow = mo.m + 1 === nowMonth;
+        return `<button class="cal-tab${i===idx ? ' active' : ''}" data-i="${i}">${mo.m+1}월${isNow ? '<span class="cal-tab-dot"></span>' : ''}</button>`;
+      }).join('');
+    }
+    if (prev) prev.disabled = (idx === 0);
+    if (next) next.disabled = (idx === months.length - 1);
+    if (typeof applyScope === 'function') applyScope(); // 어드민/홈페이지 필터 다시 적용
+  }
+
+  function go(i){
+    idx = Math.min(months.length - 1, Math.max(0, i));
+    render();
+  }
+
+  if (tabs) tabs.addEventListener('click', e=>{
+    const b = e.target.closest('.cal-tab');
+    if (b) go(Number(b.dataset.i));
+  });
+  if (prev) prev.addEventListener('click', ()=> go(idx - 1));
+  if (next) next.addEventListener('click', ()=> go(idx + 1));
+
+  // 좌우 방향키로도 이동 (입력 중이 아닐 때만)
+  document.addEventListener('keydown', e=>{
+    if (e.target && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
+    const cal = document.getElementById('calendar');
+    if (!cal || cal.style.display === 'none') return;
+    if (e.key === 'ArrowLeft')  go(idx - 1);
+    if (e.key === 'ArrowRight') go(idx + 1);
+  });
+
+  render();
+
+  // 인쇄할 때는 6개월 전부 펼치고, 끝나면 원래 달로 되돌린다
+  window.addEventListener('beforeprint', ()=>{
+    root.innerHTML = months.map(buildMonth).join('');
+    root.className = 'space-y-5';
+    try { applyScope(); } catch(_) {}
+  });
+  window.addEventListener('afterprint', ()=>{
+    root.className = '';
+    render();
+  });
+})();
 </script>
 
 </body>
