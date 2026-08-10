@@ -85,7 +85,13 @@ tailwind.config = {
   /* 어드민/홈페이지 보기 토글 */
   .scope-btn { color:#64748b; }
   .scope-btn.active { background:#2563eb; color:#fff; }
-  .nav-group { font-size:10px; font-weight:900; color:#94a3b8; letter-spacing:.08em; padding:12px 10px 4px; }
+  /* GNB 대분류: 전체 / 신규 기능 구현 일정 / 페어 운영 일정 */
+  .nav-group {
+    font-size:12px; font-weight:900; color:#0F172A; letter-spacing:-.01em;
+    padding:10px 10px 6px; margin-top:12px; border-top:1px solid #E2E8F0;
+  }
+  .nav-group-top { margin-top:2px; border-top:0; padding-top:4px; }
+  .nav-group-sub { display:block; font-size:10px; font-weight:700; color:#94A3B8; letter-spacing:0; margin-top:2px; }
   /* 캘린더 */
   /* 캘린더 일간 칸: 라벨 유무와 관계없이 모든 달·모든 주에서 동일 크기 */
   .cal-day { height:40px; }
@@ -118,28 +124,28 @@ tailwind.config = {
         <p class="text-[10px] text-slate-400 mt-1">2026.08.10 기준</p>
       </div>
       <nav id="sideNav">
-        <p class="nav-group">일정</p>
-        <a class="nav-link" href="#timeline">📈 월별 일정표 (전체 흐름)</a>
-        <a class="nav-link" href="#calendar">🗓️ 월별 캘린더 (주차별)</a>
-        <a class="nav-link" href="#ops">🔄 운영 일정 (사무국 10단계)</a>
-        <div class="nav-sub">
-          <a class="nav-link" href="#cal-7">7월 · 21회차 행사 (종료)</a>
-          <a class="nav-link" href="#cal-8">8월 · 집중 개발</a>
-          <a class="nav-link" href="#cal-9">9월 · 23회차 신청 시작</a>
-          <a class="nav-link" href="#cal-10">10월 · 타이페이</a>
-          <a class="nav-link" href="#cal-11">11월 · 부일페</a>
-          <a class="nav-link" href="#cal-12">12월 · 새 단장</a>
-        </div>
-        <p class="nav-group">한눈에 보기</p>
+        <p class="nav-group nav-group-top">전체</p>
         <a class="nav-link" href="#risk">🚨 지금 막힌 것</a>
         <a class="nav-link" href="#milestones">📅 꼭 기억할 주요 날짜</a>
         <a class="nav-link" href="#summary">📊 핵심 요약 3가지</a>
-        <p class="nav-group">기획</p>
-        <a class="nav-link" href="#planning">📝 기획 일정</a>
-        <p class="nav-group">협의 사항</p>
         <a class="nav-link" href="#decisions">📌 결정 사항 · 확인 요청</a>
-        <p class="nav-group">상세</p>
+
+        <p class="nav-group">신규 기능 구현 일정 <span class="nav-group-sub">개발팀이 만드는 것</span></p>
+        <a class="nav-link" href="#timeline">📈 월별 일정표 (전체 흐름)</a>
+        <a class="nav-link" href="#calendar">🗓️ 월별 캘린더 (주차별)</a>
+        <div class="nav-sub">
+          <a class="nav-link" href="#cal-7">7월 · 21회차 행사 (종료)</a>
+          <a class="nav-link" href="#cal-8">8월 · 부일페 잔금 · 신청서 제작</a>
+          <a class="nav-link" href="#cal-9">9월 · 23회차 신청 오픈</a>
+          <a class="nav-link" href="#cal-10">10월 · 타이페이</a>
+          <a class="nav-link" href="#cal-11">11월 · 부일페 V.7</a>
+          <a class="nav-link" href="#cal-12">12월 · 새 단장</a>
+        </div>
+        <a class="nav-link" href="#planning">📝 기획 일정</a>
         <a class="nav-link" href="#tasks">📋 할 일 상세 목록</a>
+
+        <p class="nav-group">페어 운영 일정 <span class="nav-group-sub">사무국이 돌리는 것</span></p>
+        <a class="nav-link" href="#ops">🔄 회차별 운영 10단계</a>
       </nav>
       <div class="border-t border-slate-100 mt-2 pt-2 px-1">
         <button id="modeBtn" class="w-full text-[11px] font-bold text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg py-2 transition">🖨️ 전체 보기 (인쇄용)</button>
