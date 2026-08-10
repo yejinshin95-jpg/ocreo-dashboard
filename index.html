@@ -115,12 +115,13 @@ tailwind.config = {
       <div class="px-2 pt-2 pb-3 border-b border-slate-100 mb-1">
         <p class="text-[10px] font-black text-blue-600 tracking-widest">OCREO</p>
         <p class="text-sm font-black text-slate-900 leading-tight">프로젝트 일정<br>대시보드</p>
-        <p class="text-[10px] text-slate-400 mt-1">2026.08.09 기준</p>
+        <p class="text-[10px] text-slate-400 mt-1">2026.08.10 기준</p>
       </div>
       <nav id="sideNav">
         <p class="nav-group">일정</p>
         <a class="nav-link" href="#timeline">📈 월별 일정표 (전체 흐름)</a>
         <a class="nav-link" href="#calendar">🗓️ 월별 캘린더 (주차별)</a>
+        <a class="nav-link" href="#ops">🔄 운영 일정 (사무국 10단계)</a>
         <div class="nav-sub">
           <a class="nav-link" href="#cal-7">7월 · 21회차 행사 (종료)</a>
           <a class="nav-link" href="#cal-8">8월 · 집중 개발</a>
@@ -155,7 +156,7 @@ tailwind.config = {
       <div>
         <p class="text-sm font-medium text-blue-600 tracking-wide mb-1">2026년 7월 – 12월 계획</p>
         <h1 class="text-3xl font-black text-slate-900">OCREO 프로젝트 일정 한눈에 보기</h1>
-        <p class="text-slate-500 mt-2">실장님 보고용 · 기획자가 정리한 진행 현황 · <strong class="text-slate-700">2026년 8월 9일 (일)</strong> · 서일페 21회차 종료 후 첫 점검</p>
+        <p class="text-slate-500 mt-2">실장님 보고용 · 기획자가 정리한 진행 현황 · <strong class="text-slate-700">2026년 8월 10일 (월)</strong> · 서일페 21회차 종료 후 첫 점검 · 운영일정 반영</p>
       </div>
     </div>
   </header>
@@ -163,14 +164,25 @@ tailwind.config = {
   <!-- 🚨 지금 막힌 것 -->
   <section id="risk" class="bg-white border-2 border-orange-300 rounded-2xl shadow-sm p-5 mb-8">
     <div class="flex items-center justify-between flex-wrap gap-2 mb-3">
-      <p class="text-base font-black text-slate-900">🚨 23회차 신청 오픈까지 <span class="text-orange-700">약 36일</span> — 신청서는 <span class="text-blue-700">무통장으로 오픈 확정</span>, 토스는 다음 과제로</p>
-      <span class="text-[11px] font-bold text-blue-700 bg-blue-50 border border-blue-300 rounded-full px-2.5 py-1">방향 결정됨 · 8/9</span>
+      <p class="text-base font-black text-slate-900">🚨 <span class="text-orange-700">부일페 V.7 잔금이 이번 달</span>인데 토스가 없습니다 — 지금 가장 급한 건 이쪽입니다</p>
+      <span class="text-[11px] font-bold text-orange-700 bg-orange-50 border border-orange-300 rounded-full px-2.5 py-1">실장님 결정 필요</span>
     </div>
-    <div class="bg-slate-900 rounded-xl px-3.5 py-2.5 mb-3">
-      <p class="text-[11px] font-bold text-blue-300 mb-1">23회차 = 2027년 여름 행사 · 신청 오픈은 미룰 수 없는 날짜입니다</p>
-      <p class="text-xs text-slate-300 leading-relaxed">여름 행사 신청은 <strong class="text-white">직전 여름이 끝나고 1~2개월 뒤에 여는 것이 관례</strong>입니다. 21회차가 8/2에 끝났으니 <strong class="text-white">9~10월 오픈</strong>이 정상 리듬이고, 이건 개발 일정 사정으로 밀 수 있는 성격이 아닙니다. <strong class="text-white">따라서 23회차 참가신청서 제작은 반드시 해야 하는 작업입니다.</strong></p>
+    <div class="bg-slate-900 rounded-xl px-3.5 py-3 mb-3">
+      <p class="text-[11px] font-bold text-orange-300 mb-1.5">운영일정(8/10) 반영 — 토스가 급한 이유가 바뀌었습니다</p>
+      <p class="text-xs text-slate-300 leading-relaxed mb-2">사무국 운영일정에 따르면 결제 수단이 단계마다 다릅니다. <strong class="text-white">계약금은 무통장, 잔금·코너비·부대시설 추가는 토스</strong>입니다. 즉 <strong class="text-white">토스가 붙는 곳은 ②계약금이 아니라 ④잔금 마감과 ⑦부대시설</strong>입니다.</p>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+        <div class="bg-orange-500/15 border border-orange-400/40 rounded-lg px-2.5 py-2">
+          <p class="text-[11px] font-bold text-orange-300 mb-0.5">부일페 V.7 · 2026년 11월 행사</p>
+          <p class="text-[11px] text-slate-300 leading-relaxed"><strong class="text-white">④잔금 = 이번 달(8월)</strong> · ⑦부대시설 = 11월. 둘 다 토스인데 <strong class="text-orange-200">토스가 미착수</strong>입니다.</p>
+        </div>
+        <div class="bg-white/5 border border-slate-600 rounded-lg px-2.5 py-2">
+          <p class="text-[11px] font-bold text-blue-300 mb-0.5">23회차 · 2027년 여름 행사</p>
+          <p class="text-[11px] text-slate-300 leading-relaxed">①오픈 8월말~9월 · ②계약금(무통장) 10월 · <strong class="text-white">④잔금은 2027년 4월</strong> — 8개월 여유가 있습니다.</p>
+        </div>
+      </div>
+      <p class="text-[11px] text-slate-400 leading-relaxed mt-2">※ 8/9까지 이 대시보드는 "9월 23회차 신청 때문에 토스가 급하다"고 적고 있었습니다. 운영일정을 받아보니 <strong class="text-slate-200">23회차 계약금은 원래 무통장이라 토스가 필요 없고, 정작 급한 건 부일페 V.7 잔금</strong>이었습니다. 진단을 바로잡습니다.</p>
     </div>
-    <p class="text-xs text-slate-600 leading-relaxed mb-3">문제는 결제 쪽입니다. 대시보드의 핵심 순서는 <strong class="text-slate-900">토스 결제 완성 → 증빙서류 자동 발행 → 신청 오픈</strong>이었는데, 8/9 기준으로 <strong class="text-orange-700">첫 단계인 토스 결제가 아직 시작되지 않았습니다.</strong> 지라에 관련 티켓이 없고, 팀 메신저에서도 7/4 이후 5주간 토스·정산·증빙 관련 대화가 한 건도 없습니다. <strong class="text-slate-900">다만 신청서 자체는 토스와 별개로 만들 수 있습니다</strong> — 결제 수단만 나중에 붙이면 됩니다.</p>
+    <p class="text-xs text-slate-600 leading-relaxed mb-3">토스 연동은 <strong class="text-orange-700">아직 시작되지 않았습니다.</strong> 지라에 관련 티켓이 없고, 팀 메신저에도 7/4 이후 5주간 토스·정산·증빙 관련 대화가 한 건도 없습니다. 부일페 V.7 잔금을 이번 달에 받아야 하는데 <strong class="text-slate-900">받을 수단이 준비되지 않은 상태</strong>라, 이번 회차는 잔금도 무통장으로 받거나 잔금 마감을 늦추는 수밖에 없습니다.</p>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
       <div class="bg-slate-50 border border-slate-200 rounded-xl p-3">
         <p class="text-[11px] font-bold text-slate-500 mb-1.5">계획했지만 착수되지 않은 일</p>
@@ -192,31 +204,31 @@ tailwind.config = {
       </div>
     </div>
     <div class="bg-blue-50 border-2 border-blue-300 rounded-lg px-3.5 py-3 mb-3">
-      <p class="text-xs font-black text-blue-800 mb-1.5">✅ 결정 (8/9) — 23회차 신청은 무통장 입금으로 오픈합니다</p>
-      <p class="text-xs text-slate-700 leading-relaxed">토스 4주 + 증빙 4주 = 최소 8주라 9~10월 오픈에 결제까지 붙이는 건 물리적으로 불가능합니다. <strong class="text-slate-900">신청서는 예정대로 열고 계약금은 무통장으로 받되, 토스·증빙은 완성되는 대로 이어서 붙입니다.</strong> 이로써 8월에 개발팀이 무엇을 해야 하는지가 정해졌습니다 — 아래 실행 계획을 보시면 됩니다.</p>
+      <p class="text-xs font-black text-blue-800 mb-1.5">✅ 결정된 것 (8/9) — 23회차 신청은 무통장 입금으로 오픈합니다</p>
+      <p class="text-xs text-slate-700 leading-relaxed">운영일정상 계약금은 원래 무통장이므로 <strong class="text-slate-900">이 건은 토스와 무관하게 예정대로 진행됩니다.</strong> 8월에 개발팀이 할 일은 아래와 같습니다.</p>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-2 mt-2.5">
-        <div class="bg-white border border-blue-200 rounded-lg p-2.5">
-          <p class="text-[11px] font-bold text-blue-800 mb-0.5">8월 · 지금</p>
-          <p class="text-[11px] text-slate-600 leading-relaxed">페어 관리 v2 검수 마무리 → <strong class="text-slate-900">23회차 신청서 제작</strong> (무통장 기준). 멀티 브랜드 정책만 먼저 확정</p>
+        <div class="bg-white border border-orange-300 rounded-lg p-2.5">
+          <p class="text-[11px] font-bold text-orange-800 mb-0.5">🔥 8월 · 최우선</p>
+          <p class="text-[11px] text-slate-600 leading-relaxed"><strong class="text-slate-900">부일페 V.7 잔금 처리 방식 확정</strong> — 이번 달 마감인데 토스가 없습니다. 무통장으로 받을지, 마감을 늦출지 결정 필요</p>
         </div>
         <div class="bg-white border border-blue-200 rounded-lg p-2.5">
-          <p class="text-[11px] font-bold text-blue-800 mb-0.5">9~10월 · 오픈 후</p>
-          <p class="text-[11px] text-slate-600 leading-relaxed">신청 접수는 무통장으로 운영. 병행해서 <strong class="text-slate-900">토스 연동 착수</strong> → 완성 후 결제 수단 추가</p>
+          <p class="text-[11px] font-bold text-blue-800 mb-0.5">8월 · 병행</p>
+          <p class="text-[11px] text-slate-600 leading-relaxed">페어 관리 v2 검수 마무리 → <strong class="text-slate-900">23회차 신청서 제작</strong> (무통장 기준). 멀티 브랜드 정책 먼저 확정</p>
         </div>
         <div class="bg-white border border-blue-200 rounded-lg p-2.5">
-          <p class="text-[11px] font-bold text-blue-800 mb-0.5">그 다음</p>
-          <p class="text-[11px] text-slate-600 leading-relaxed">토스 완성 → <strong class="text-slate-900">증빙서류 자동 발행</strong> 착수. 무통장 기간 발생분은 수동 발행으로 대응</p>
+          <p class="text-[11px] font-bold text-blue-800 mb-0.5">9~11월</p>
+          <p class="text-[11px] text-slate-600 leading-relaxed"><strong class="text-slate-900">토스 연동 착수</strong> — 11월 부일페 ⑦부대시설이 다음 토스 필요 시점입니다. 여기까지는 맞춰야 합니다</p>
         </div>
       </div>
     </div>
-    <div class="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5 text-xs text-slate-700 leading-relaxed">💬 <span class="font-bold text-slate-900">기획자 의견</span> — 무통장 오픈으로 정해지면서 <strong class="text-slate-900">"토스가 늦어 신청을 못 연다"는 위험은 해소됐습니다.</strong> 다만 무통장으로 받는 동안 사무국이 입금 대사를 손으로 해야 하는데, 정산 관리 기능도 미착수라 그 부담이 그대로 남습니다. <strong class="text-slate-900">정산 관리 1단계(입금 목록·상세)만이라도 신청 오픈 전에 만들어두는 것을 권합니다</strong> — 토스보다 이쪽이 먼저입니다.</div>
+    <div class="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5 text-xs text-slate-700 leading-relaxed">💬 <span class="font-bold text-slate-900">기획자 의견</span> — 운영일정을 받고 보니 급한 순서가 달랐습니다. <strong class="text-slate-900">23회차는 무통장이라 여유가 있고, 부일페 V.7 잔금이 당장입니다.</strong> 이번 달 잔금은 무통장으로 받는 것이 현실적이라고 봅니다 — 그렇게 하면 <strong class="text-slate-900">토스의 실질 마감은 11월 부일페 부대시설</strong>이 되어 약 3개월이 확보됩니다. 다만 무통장으로 받으면 사무국이 입금 대사를 손으로 해야 하므로, <strong class="text-slate-900">정산 관리 1단계(입금 목록·상세)를 먼저 만드는 것이 토스보다 급합니다.</strong></div>
   </section>
 
   <!-- 이번 주 브리핑 (일요일 저녁 진행 상황 확인 후 갱신되는 영역) -->
   <section id="briefing" class="bg-white border border-slate-200 border-l-4 !border-l-blue-600 rounded-2xl shadow-sm p-5 mb-8">
     <div class="flex items-center justify-between flex-wrap gap-2 mb-2">
       <p class="text-sm font-black text-slate-900">📢 이번 주 브리핑</p>
-      <p class="text-[11px] text-slate-400">최종 업데이트: 8/9 (일) · 지라 + 팀 메신저 대조</p>
+      <p class="text-[11px] text-slate-400">최종 업데이트: 8/10 (월) · 지라 + 팀 메신저 + 운영일정 대조</p>
     </div>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
       <div>
@@ -246,12 +258,12 @@ tailwind.config = {
         <p class="text-[10px] text-slate-500 mt-0.5">8/4 종료 처리 완료 · 결과보고서 데이터 정리 중</p>
       </div>
       <div class="bg-slate-800 rounded-xl p-3 border-l-4 border-orange-400">
-        <p class="text-[11px] font-bold text-orange-300">8/17 주 · 8일 남음</p>
+        <p class="text-[11px] font-bold text-orange-300">8/17 주 · 7일 남음</p>
         <p class="text-xs font-bold text-white mt-1">⚠️ 토스 결제 연동 착수 — 더 미루면 9월 신청이 불가능해집니다</p>
         <p class="text-[10px] text-slate-400 mt-0.5">아직 지라 티켓 없음 · 착수 결정 필요</p>
       </div>
       <div class="bg-slate-800 rounded-xl p-3 border-l-4 border-orange-400">
-        <p class="text-[11px] font-bold text-orange-300">9~10월 · 약 36일 남음</p>
+        <p class="text-[11px] font-bold text-orange-300">9~10월 · 약 35일 남음</p>
         <p class="text-xs font-bold text-white mt-1">🔥 23회차 참가신청 오픈 (2027년 여름 행사) · 무통장 입금</p>
         <p class="text-[10px] text-orange-300/80 mt-0.5">여름 종료 후 1~2개월 오픈이 관례 — 미룰 수 없는 날짜. 신청서 제작 필수</p>
       </div>
@@ -266,7 +278,7 @@ tailwind.config = {
         <p class="text-[10px] text-orange-300/80 mt-0.5">토스 완성이 선행 조건 — 함께 밀릴 수 있음</p>
       </div>
       <div class="bg-slate-800 rounded-xl p-3 border-l-4 border-blue-400">
-        <p class="text-[11px] font-bold text-blue-300">10/28 · 80일 남음</p>
+        <p class="text-[11px] font-bold text-blue-300">10/28 · 79일 남음</p>
         <p class="text-xs font-bold text-white mt-1">타이페이 행사 · 참가자 명단 + 중국어 도면 준비</p>
       </div>
     </div>
@@ -342,8 +354,8 @@ tailwind.config = {
       <div class="absolute top-0 bottom-0 border-l-2 border-slate-300 z-10" style="left: calc(200px + (100% - 200px) * 0.158);">
         <span class="absolute -top-1 left-1 text-[10px] font-bold text-slate-400 whitespace-nowrap">21회차 (종료)</span>
       </div>
-      <div class="absolute top-0 bottom-0 border-l-2 border-dashed border-slate-900 z-10" style="left: calc(200px + (100% - 200px) * 0.212);">
-        <span class="absolute -top-1 left-1.5 text-[10px] font-bold text-slate-900 bg-slate-100 rounded px-1.5 py-0.5 whitespace-nowrap">오늘 8/9</span>
+      <div class="absolute top-0 bottom-0 border-l-2 border-dashed border-slate-900 z-10" style="left: calc(200px + (100% - 200px) * 0.217);">
+        <span class="absolute -top-1 left-1.5 text-[10px] font-bold text-slate-900 bg-slate-100 rounded px-1.5 py-0.5 whitespace-nowrap">오늘 8/10</span>
       </div>
       <div class="absolute top-0 bottom-0 border-l-2 border-blue-300 z-10" style="left: calc(200px + (100% - 200px) * 0.647);">
         <span class="absolute -top-1 left-1 text-[10px] font-bold text-blue-500 whitespace-nowrap">타이페이 10/28</span>
@@ -536,6 +548,63 @@ tailwind.config = {
     <div id="calRoot" class="space-y-5"></div>
   </section>
 
+  <!-- 운영 일정 (사무국) -->
+  <section id="ops" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-8">
+    <div class="mb-4">
+      <h2 class="text-lg font-black text-slate-900">운영 일정 <span class="text-slate-400 font-medium text-sm">· 회차마다 반복되는 사무국 10단계</span></h2>
+      <p class="text-xs text-slate-400 mt-1">실장님 제공 자료(8/10)를 옮긴 것입니다. 페어 한 회차는 <strong class="text-slate-500">①오픈부터 행사까지 약 12개월</strong>이 걸리고, 회차마다 같은 순서를 시작 월만 달리해 반복합니다. 가로로 스크롤하면 12개월 전체가 보입니다.</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-5">
+      <div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5">
+        <p class="text-[11px] font-black text-slate-500 tracking-wider mb-1.5">상시 운영</p>
+        <p class="text-xs text-slate-700 leading-relaxed font-bold">크리에이터 인증 · 바이어 인증 · 바이어 등록</p>
+        <p class="text-[11px] text-slate-500 leading-relaxed mt-1">신청 안내와 신청폼은 직접 작성하거나 양식을 이용합니다. 회차와 무관하게 연중 계속됩니다.</p>
+      </div>
+      <div class="bg-blue-50/60 border-2 border-blue-200 rounded-xl p-3.5">
+        <p class="text-[11px] font-black text-blue-700 tracking-wider mb-1.5">입금 관리 — 결제 수단이 단계마다 다릅니다</p>
+        <div class="space-y-1 text-xs">
+          <p class="text-slate-700"><span class="inline-block w-[68px] font-bold">계약금</span> <span class="font-bold text-slate-900 bg-white border border-slate-300 rounded px-1.5 py-px">무통장 입금</span> <span class="text-slate-400">— ②확정·입금 단계</span></p>
+          <p class="text-slate-700"><span class="inline-block w-[68px] font-bold">잔금 · 코너비<br>부대시설 추가</span> <span class="font-bold text-white bg-blue-600 rounded px-1.5 py-px">토스</span> <span class="text-slate-400">— ④잔금 · ⑦부대시설 단계</span></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-orange-50 border-2 border-orange-300 rounded-xl p-3.5 mb-5">
+      <p class="text-[11px] font-black text-orange-800 tracking-wider mb-2">🔴 지금(8/10) 각 페어가 서 있는 단계</p>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+        <div class="bg-white border border-orange-200 rounded-lg p-2.5">
+          <p class="text-xs font-black text-slate-900 mb-0.5">부일페 V.7 <span class="text-[10px] font-bold text-slate-400">· 2026년 11월 행사</span></p>
+          <p class="text-xs text-slate-700 leading-relaxed"><span class="font-bold text-orange-800">④ 잔금 마감 — 이번 달입니다.</span> 잔금은 토스로 받기로 되어 있는데 <strong class="text-orange-800">토스 연동이 아직 미착수</strong>입니다. 11월 ⑦부대시설도 토스입니다.</p>
+        </div>
+        <div class="bg-white border border-slate-200 rounded-lg p-2.5">
+          <p class="text-xs font-black text-slate-900 mb-0.5">23회차 <span class="text-[10px] font-bold text-slate-400">· 2027년 여름 행사</span></p>
+          <p class="text-xs text-slate-700 leading-relaxed"><span class="font-bold text-blue-700">① 오픈 준비 중</span> — 8월말~9월 오픈 예정. ②계약금은 <strong class="text-slate-900">무통장</strong>이라 토스가 필요 없고, <strong class="text-slate-900">④잔금은 2027년 4월</strong>이라 8개월 남았습니다.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="overflow-x-auto -mx-1 px-1">
+      <div class="min-w-[900px]">
+        <div class="grid text-center text-[11px] font-bold text-slate-400 pb-2 border-b border-slate-200" style="grid-template-columns: 132px repeat(12, 1fr);">
+          <div></div>
+          <div>1월</div><div>2월</div><div>3월</div><div>4월</div><div>5월</div><div>6월</div>
+          <div>7월</div><div>8월</div><div>9월</div><div>10월</div><div>11월</div><div>12월</div>
+        </div>
+        <div id="opsRows"></div>
+      </div>
+    </div>
+
+    <div class="mt-4 pt-3 border-t border-slate-100">
+      <p class="text-[11px] font-black text-slate-400 tracking-wider mb-2">10단계</p>
+      <div class="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-slate-500">
+        <span>① 신청·검수</span><span>② 확정·입금 <span class="text-slate-400">(계약금·무통장)</span></span><span>③ 갤러리등록</span>
+        <span class="font-bold text-blue-700">④ 잔금 마감 (토스)</span><span>⑤ 부스배정</span><span>⑥ 키트발송</span>
+        <span class="font-bold text-blue-700">⑦ 부대시설 (토스)</span><span>⑧ 참가자 현장 매뉴얼</span><span>⑨ 증빙발행</span><span>⑩ 개최결과보고서</span>
+      </div>
+    </div>
+  </section>
+
   <!-- 기획 일정 -->
   <section id="planning" class="mb-8">
     <div class="mb-4">
@@ -630,7 +699,7 @@ tailwind.config = {
   <!-- 결정 사항 / 확인 요청 -->
   <section id="decisions" class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8">
     <div class="bg-blue-50/60 border border-blue-100 rounded-2xl p-5">
-      <p class="text-xs font-black text-blue-700 tracking-wider mb-3">📌 7/4 협의에서 결정된 사항 <span class="font-medium text-blue-500">— 8/9 기준 이행 여부 표시</span></p>
+      <p class="text-xs font-black text-blue-700 tracking-wider mb-3">📌 7/4 협의에서 결정된 사항 <span class="font-medium text-blue-500">— 8/10 기준 이행 여부 표시</span></p>
       <div class="space-y-2 text-xs text-slate-600">
         <p><strong class="text-slate-800">① 증빙서류는 바로빌 한 곳에서 발행 (확정)</strong> — 토스가 "세금계산서는 결제 중개사라 발행 불가"라고 공식 답변(6/26 메일)하여, 세금계산서·현금영수증 모두 발행 대행사 '바로빌'로 통일이 확정. 토스가 자동으로 끊어주는 현금영수증은 중복 발행을 막기 위해 끄기 설정(토스에서 일괄 끄기 가능 확인).</p>
         <p class="bg-orange-50 border border-orange-200 rounded-lg px-2.5 py-2"><strong class="text-slate-800">② 토스 결제 작업을 7월에 먼저 시작</strong> — 행사 준비와 함께 진행. 뒤에 이어지는 증빙서류 기능을 만들 시간 4주를 확보하려던 결정. <strong class="text-orange-800">→ 8/9 현재 실행되지 않았습니다.</strong> 7월이 행사 지원·방화벽 구축에 쓰이면서 착수되지 못했습니다.</p>
@@ -640,16 +709,17 @@ tailwind.config = {
       </div>
     </div>
     <div class="bg-orange-50/70 border-2 border-orange-300 rounded-2xl p-5">
-      <p class="text-xs font-black text-orange-800 tracking-wider mb-3">⚠️ 실장님께 확인 부탁드릴 사항 <span class="font-medium text-orange-600">— 8/9 기준</span></p>
+      <p class="text-xs font-black text-orange-800 tracking-wider mb-3">⚠️ 실장님께 확인 부탁드릴 사항 <span class="font-medium text-orange-600">— 8/10 기준</span></p>
       <div class="space-y-2 text-xs text-slate-600">
         <p class="bg-blue-50 border border-blue-200 rounded-lg px-2.5 py-2"><strong class="text-blue-800">✅ 해결됨 — 23회차 신청 결제 방식</strong> <span class="text-slate-500">(8/9)</span> — <strong class="text-slate-800">무통장 입금으로 오픈</strong>하기로 정해졌습니다. 신청서는 예정대로 제작하고, 토스·증빙은 완성되는 대로 이어 붙입니다.</p>
-        <p><strong class="text-slate-900">① 멀티 브랜드 허용 여부 (가장 급함)</strong> — 한 기업이 여러 브랜드로 신청하는 것을 허용할지가 신청서 구조 전체를 좌우합니다. 8월 제작에 들어가려면 이번 주 안에 정해져야 합니다.</p>
-        <p><strong class="text-slate-900">② 부일페 티켓 판매를 토스로? <span class="text-[10px] text-blue-700 bg-blue-50 border border-blue-200 rounded px-1 py-px">실장님 문의</span></strong> — 확인해보니 지금 티켓은 <strong>네이버 예매로 외부 위탁</strong> 중이고 홈페이지는 링크만 걸어주는 구조입니다. 토스로 직접 팔려면 결제뿐 아니라 <strong>발권(QR)·현장 검표·예매 취소 정책</strong>까지 새로 만들어야 해서, 11월 부일페에 맞추기는 어렵다고 봅니다. <strong>서일페 V.22 이후 과제로 잡고, 개발팀 공수 견적을 받아 다시 보고드리겠습니다.</strong> 진행할지 여부만 알려주세요.</p>
-        <p><strong class="text-slate-900">③ 정산 관리 1단계를 신청 오픈 전에 넣을지</strong> — 무통장으로 받으면 사무국이 입금 대사를 손으로 해야 합니다. 입금 목록·상세 화면만이라도 오픈 전에 만들어두면 부담이 크게 줄어듭니다. <strong>토스보다 이쪽이 먼저라고 봅니다.</strong></p>
-        <p><strong class="text-slate-900">④ 워터마킹 기존 이미지 소급 적용</strong> — 앞으로 올라오는 이미지만 적용할지, 이미 올라간 것까지 적용할지. <strong>소급 적용 시 비용 100만원 이상</strong>이 예상됩니다 (8/9 개발팀 추산).</p>
-        <p><strong class="text-slate-900">⑤ 부일페 V.7 행사 날짜</strong> — 티켓 예매와 참가자 리스트는 이미 열렸는데(8/5) 행사 날짜가 확정되지 않아 11월 일정을 확정하지 못하고 있습니다.</p>
-        <p><strong class="text-slate-900">⑥ 중복 결제 환불 처리 (7/4부터 5주째)</strong> — 한 유저가 가상계좌+퀵계좌이체 두 건을 결제한 경우 해약금 제외 환불액을 어떻게 처리할지. 토스 연동 설계에 필요한 선행 결정입니다.</p>
-        <p><strong class="text-slate-900">⑦ 증빙서류 기능 완성 시점</strong> — 기존 승인 요청(9월 말)도 토스 지연으로 다시 밀립니다. ①이 정해지면 함께 다시 잡겠습니다.</p>
+        <p class="bg-orange-100/70 border border-orange-300 rounded-lg px-2.5 py-2"><strong class="text-orange-900">① 부일페 V.7 잔금을 어떻게 받을지 (가장 급함 · 이번 달 마감)</strong> — 운영일정상 잔금은 토스인데 토스가 미착수입니다. <strong>이번 회차만 무통장으로 받을지 / 잔금 마감을 늦출지</strong> 결정 부탁드립니다. 무통장으로 받으면 토스의 실질 마감이 11월 부대시설로 미뤄져 약 3개월이 확보됩니다.</p>
+        <p><strong class="text-slate-900">② 멀티 브랜드 허용 여부 (신청서 제작 전 필수)</strong> — 한 기업이 여러 브랜드로 신청하는 것을 허용할지가 신청서 구조 전체를 좌우합니다. 8월 제작에 들어가려면 이번 주 안에 정해져야 합니다.</p>
+        <p><strong class="text-slate-900">③ 부일페 티켓 판매를 토스로? <span class="text-[10px] text-blue-700 bg-blue-50 border border-blue-200 rounded px-1 py-px">실장님 문의</span></strong> — 확인해보니 지금 티켓은 <strong>네이버 예매로 외부 위탁</strong> 중이고 홈페이지는 링크만 걸어주는 구조입니다. 토스로 직접 팔려면 결제뿐 아니라 <strong>발권(QR)·현장 검표·예매 취소 정책</strong>까지 새로 만들어야 해서, 11월 부일페에 맞추기는 어렵다고 봅니다. <strong>서일페 V.22 이후 과제로 잡고, 개발팀 공수 견적을 받아 다시 보고드리겠습니다.</strong> 진행할지 여부만 알려주세요.</p>
+        <p><strong class="text-slate-900">④ 정산 관리 1단계를 신청 오픈 전에 넣을지</strong> — 무통장으로 받으면 사무국이 입금 대사를 손으로 해야 합니다. 입금 목록·상세 화면만이라도 오픈 전에 만들어두면 부담이 크게 줄어듭니다. <strong>토스보다 이쪽이 먼저라고 봅니다.</strong></p>
+        <p><strong class="text-slate-900">⑤ 워터마킹 기존 이미지 소급 적용</strong> — 앞으로 올라오는 이미지만 적용할지, 이미 올라간 것까지 적용할지. <strong>소급 적용 시 비용 100만원 이상</strong>이 예상됩니다 (8/9 개발팀 추산).</p>
+        <p><strong class="text-slate-900">⑥ 부일페 V.7 행사 날짜</strong> — 티켓 예매와 참가자 리스트는 이미 열렸는데(8/5) 행사 날짜가 확정되지 않아 11월 일정을 확정하지 못하고 있습니다.</p>
+        <p><strong class="text-slate-900">⑦ 중복 결제 환불 처리 (7/4부터 5주째)</strong> — 한 유저가 가상계좌+퀵계좌이체 두 건을 결제한 경우 해약금 제외 환불액을 어떻게 처리할지. 토스 연동 설계에 필요한 선행 결정입니다.</p>
+        <p><strong class="text-slate-900">⑧ 증빙서류 기능 완성 시점</strong> — 기존 승인 요청(9월 말)도 토스 지연으로 다시 밀립니다. ①이 정해지면 함께 다시 잡겠습니다.</p>
         <p class="text-slate-400 pt-1">타이페이 확정자 신청서 공개일은 여전히 미정입니다 — 10/28 행사이므로 9월 중 결정 필요.</p>
       </div>
     </div>
@@ -663,7 +733,7 @@ tailwind.config = {
         <span>✅ 완료</span><span>⏳ 남은 일</span><span>⚠️ 주의·확인</span><span class="text-orange-600">📌 실장님 확인</span>
       </div>
     </div>
-    <p class="text-xs text-slate-400 mb-3">각 항목은 다음 액션과 일정만 먼저 보여줍니다. 진행 내역은 '자세히 보기'를 누르면 펼쳐집니다. 주황색은 지연되었거나 확인이 필요한 항목입니다. (8/9 기준 · 지라 + 팀 메신저 대조)</p>
+    <p class="text-xs text-slate-400 mb-3">각 항목은 다음 액션과 일정만 먼저 보여줍니다. 진행 내역은 '자세히 보기'를 누르면 펼쳐집니다. 주황색은 지연되었거나 확인이 필요한 항목입니다. (8/10 기준 · 지라 + 팀 메신저 대조)</p>
     <div>
       <div class="task-row py-4 border-b border-slate-100" data-scope="home">
         <div class="flex items-center gap-2 flex-wrap">
@@ -960,9 +1030,9 @@ tailwind.config = {
   <footer class="text-center pb-6">
     <div class="inline-flex items-center gap-2 bg-white border border-slate-200 rounded-full px-4 py-2 mb-3">
       <span class="w-2 h-2 rounded-full bg-blue-600 pulse-dot"></span>
-      <span class="text-[11px] font-bold text-slate-500">자료 출처: 개발팀 업무기록(지라) · 팀 메신저(슬랙) <span class="text-slate-400 font-medium">(8/9 기준)</span></span>
+      <span class="text-[11px] font-bold text-slate-500">자료 출처: 개발팀 업무기록(지라) · 팀 메신저(슬랙) · 사무국 운영일정 <span class="text-slate-400 font-medium">(8/10 기준)</span></span>
     </div>
-    <p class="text-[11px] text-slate-400">본 자료는 2026년 8월 9일 기준으로, 개발팀 업무기록(지라) 조회 결과와 팀 메신저(슬랙) <span class="text-slate-500">#ocreo-개발 · #ocreo-운영이슈대응</span> 채널의 7/4~8/9 대화를 대조해 기획자가 정리한 것입니다. 7/4 일정 협의 결과와 토스페이먼츠 공식 답변(6/26)을 기준선으로 삼았습니다. · 문의: ocreohello@gmail.com</p>
+    <p class="text-[11px] text-slate-400">본 자료는 2026년 8월 10일 기준으로, 개발팀 업무기록(지라) 조회 결과와 팀 메신저(슬랙) <span class="text-slate-500">#ocreo-개발 · #ocreo-운영이슈대응</span> 채널의 7/4~8/10 대화를 대조해 기획자가 정리한 것입니다. 7/4 일정 협의 결과와 토스페이먼츠 공식 답변(6/26)을 기준선으로 삼았습니다. · 문의: ocreohello@gmail.com</p>
     <p class="text-[11px] text-slate-400 mt-1.5">확인하지 못한 범위: <span class="text-slate-500">#기획-개발</span> 채널, 카카오톡 대화, 지라에 티켓이 없는 작업. 이 범위의 진행 상황은 반영되지 않았습니다.</p>
   </footer>
 
@@ -1113,7 +1183,84 @@ const specialDays = {
   '2026-08-02': { label:'행사', cls:'bg-slate-900 text-white' },
   '2026-10-28': { label:'타이페이', cls:'bg-blue-700 text-white' },
 };
-const TODAY = '2026-08-09';
+const TODAY = '2026-08-10';
+
+// ===================== 운영 일정 (사무국 10단계) =====================
+// 실장님 제공 자료(8/10) 기준. m = 월(1~12), s = 단계 번호, t = 라벨.
+// toss:true 인 단계는 토스 결제가 붙는 구간(④잔금 · ⑦부대시설).
+const OPS_FAIRS = [
+  { name:'SIF21', tone:'rose', event:{ m:8, label:'SIF21' }, steps:[
+    { m:4,  s:'④', t:'잔금, 페어스토리<br>티켓판매', toss:true },
+    { m:5,  s:'⑤', t:'부스배정, 바이어등록' },
+    { m:6,  s:'⑥', t:'kit발송, 도면' },
+    { m:7,  s:'⑦', t:'부대시설', toss:true },
+    { m:8,  s:'⑧⑨', t:'현장매뉴얼<br>증빙발행·결과보고' },
+    { m:9,  s:'①', t:'오픈' },
+    { m:10, s:'②', t:'확정대기입금' },
+    { m:11, s:'③', t:'포트폴리오' },
+  ]},
+  { name:'BIF6', tone:'amber', steps:[
+    { m:1,  s:'①', t:'오픈' },
+    { m:2,  s:'②', t:'확정대기입금' },
+    { m:3,  s:'③', t:'포트폴리오' },
+    { m:8,  s:'④', t:'잔금, 페어스토리<br>티켓판매', toss:true },
+    { m:9,  s:'⑤', t:'부스배정, 바이어등록' },
+    { m:10, s:'⑥', t:'kit발송, 도면' },
+    { m:11, s:'⑦', t:'부대시설', toss:true },
+    { m:12, s:'⑧⑨', t:'현장매뉴얼<br>증빙발행·결과보고' },
+  ]},
+  { name:'SIF20', tone:'sky', steps:[
+    { m:1,  s:'①', t:'오픈' },
+    { m:1,  s:'⑨', t:'증빙발행<br>결과보고' },
+    { m:2,  s:'②', t:'확정대기입금' },
+    { m:3,  s:'③', t:'포트폴리오' },
+    { m:9,  s:'④', t:'잔금, 페어스토리<br>티켓판매', toss:true },
+    { m:10, s:'⑤', t:'부스배정, 바이어등록' },
+    { m:11, s:'⑥', t:'kit발송, 도면' },
+    { m:12, s:'⑦', t:'부대시설', toss:true },
+    { m:12, s:'⑧', t:'현장<br>매뉴얼' },
+  ]},
+];
+
+const OPS_TONE = {
+  rose:  { text:'text-[#D6336C]', badge:'bg-[#F06595] text-white' },
+  amber: { text:'text-[#E8590C]', badge:'bg-[#FD7E14] text-white' },
+  sky:   { text:'text-[#1971C2]', badge:'bg-[#1C7ED6] text-white' },
+};
+
+(function renderOps(){
+  const root = document.getElementById('opsRows');
+  if (!root) return;
+  const thisMonth = Number(TODAY.slice(5,7));
+  root.innerHTML = OPS_FAIRS.map(f=>{
+    const tone = OPS_TONE[f.tone];
+    // 월별로 항목을 모아 한 칸에 여러 개가 와도 겹치지 않게 쌓는다
+    const byMonth = {};
+    f.steps.forEach(st=>{ (byMonth[st.m] = byMonth[st.m] || []).push(st); });
+    if (f.event) (byMonth[f.event.m] = byMonth[f.event.m] || []).unshift({ ev:f.event.label });
+
+    const cells = [];
+    for (let m=1; m<=12; m++){
+      const items = byMonth[m] || [];
+      const isNow = m === thisMonth;
+      const body = items.map(it=>{
+        if (it.ev) return `<span class="inline-block text-[10px] font-black rounded-full px-2 py-0.5 mb-1 ${tone.badge}">${it.ev}</span>`;
+        return `<div class="leading-tight mb-1">
+            <span class="text-[10px] font-bold ${tone.text}">${it.s}</span>
+            ${it.toss ? '<span class="text-[9px] font-bold text-white bg-blue-600 rounded px-1 ml-0.5 align-middle">토스</span>' : ''}
+            <p class="text-[10px] font-bold ${tone.text} leading-tight mt-0.5">${it.t}</p>
+          </div>`;
+      }).join('');
+      cells.push(`<div class="px-1.5 py-2 border-l border-slate-100 ${isNow ? 'bg-amber-50' : ''}">${body}</div>`);
+    }
+    return `<div class="grid items-stretch border-b border-slate-100" style="grid-template-columns: 132px repeat(12, 1fr);">
+        <div class="pr-2 py-2 flex items-start">
+          <span class="text-[10px] font-black rounded-full px-2 py-0.5 ${tone.badge}">${f.name}</span>
+        </div>
+        ${cells.join('')}
+      </div>`;
+  }).join('');
+})();
 
 // 월 헤더는 DESIGN.md 규칙에 따라 primary 단일 색으로 통일 (색은 상태 신호로만 사용)
 const months = [
@@ -1202,7 +1349,7 @@ document.getElementById('calRoot').innerHTML = months.map(buildMonth).join('');
 
 // ===================== 사이드 메뉴 · 탭 방식 화면 전환 =====================
 const links = Array.from(document.querySelectorAll('#sideNav a'));
-const VIEW_IDS = ['milestones','summary','timeline','calendar','planning','decisions','tasks'];
+const VIEW_IDS = ['milestones','summary','timeline','calendar','ops','planning','decisions','tasks'];
 let mode = 'tab';           // 'tab' = 한 번에 한 화면 | 'all' = 전체 스크롤(인쇄용)
 let current = 'timeline'; // 현재 보고 있는 화면 (첫 화면: 월별 일정표)
 
