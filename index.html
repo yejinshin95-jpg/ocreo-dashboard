@@ -78,20 +78,19 @@ tailwind.config = {
   @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:.4} }
   .pulse-dot { animation: pulse-dot 1.6s infinite; }
   /* 사이드 메뉴 */
-  .nav-link { display:block; padding:6px 10px; border-radius:8px; font-size:12px; font-weight:600; color:#64748b; transition:all .15s; border-left:2px solid transparent; }
-  .nav-link:hover { background:#eff6ff; color:#1d4ed8; }
-  .nav-link.active { background:#eff6ff; color:#1d4ed8; border-left-color:#2563eb; }
-  .nav-sub { margin-left:14px; }
+  /* 사이드 메뉴: 전체 / 신규 기능 구현 일정 / 페어 운영 일정 — 3개뿐 */
+  .nav-item {
+    display:block; width:100%; text-align:left;
+    padding:11px 12px; margin-bottom:4px; border-radius:10px;
+    font-size:13px; font-weight:800; color:#475569;
+    background:transparent; border:1px solid transparent;
+    cursor:pointer; transition:all .15s;
+  }
+  .nav-item:hover { background:#F1F5F9; color:#0F172A; }
+  .nav-item.active { background:#2563EB; color:#fff; border-color:#2563EB; }
   /* 어드민/홈페이지 보기 토글 */
   .scope-btn { color:#64748b; }
   .scope-btn.active { background:#2563eb; color:#fff; }
-  /* GNB 대분류: 전체 / 신규 기능 구현 일정 / 페어 운영 일정 */
-  .nav-group {
-    font-size:12px; font-weight:900; color:#0F172A; letter-spacing:-.01em;
-    padding:10px 10px 6px; margin-top:12px; border-top:1px solid #E2E8F0;
-  }
-  .nav-group-top { margin-top:2px; border-top:0; padding-top:4px; }
-  .nav-group-sub { display:block; font-size:10px; font-weight:700; color:#94A3B8; letter-spacing:0; margin-top:2px; }
   /* 캘린더 */
   /* 캘린더 일간 칸: 라벨 유무와 관계없이 모든 달·모든 주에서 동일 크기 */
   .cal-day { height:40px; }
@@ -124,32 +123,10 @@ tailwind.config = {
         <p class="text-[10px] text-slate-400 mt-1">2026.08.10 기준</p>
       </div>
       <nav id="sideNav">
-        <p class="nav-group nav-group-top">전체</p>
-        <a class="nav-link" href="#risk">🚨 지금 막힌 것</a>
-        <a class="nav-link" href="#milestones">📅 꼭 기억할 주요 날짜</a>
-        <a class="nav-link" href="#summary">📊 핵심 요약 3가지</a>
-        <a class="nav-link" href="#decisions">📌 결정 사항 · 확인 요청</a>
-
-        <p class="nav-group">신규 기능 구현 일정 <span class="nav-group-sub">개발팀이 만드는 것</span></p>
-        <a class="nav-link" href="#timeline">📈 월별 일정표 (전체 흐름)</a>
-        <a class="nav-link" href="#calendar">🗓️ 월별 캘린더 (주차별)</a>
-        <div class="nav-sub">
-          <a class="nav-link" href="#cal-7">7월 · 21회차 행사 (종료)</a>
-          <a class="nav-link" href="#cal-8">8월 · 부일페 잔금 · 신청서 제작</a>
-          <a class="nav-link" href="#cal-9">9월 · 23회차 신청 오픈</a>
-          <a class="nav-link" href="#cal-10">10월 · 타이페이</a>
-          <a class="nav-link" href="#cal-11">11월 · 부일페 V.7</a>
-          <a class="nav-link" href="#cal-12">12월 · 새 단장</a>
-        </div>
-        <a class="nav-link" href="#planning">📝 기획 일정</a>
-        <a class="nav-link" href="#tasks">📋 할 일 상세 목록</a>
-
-        <p class="nav-group">페어 운영 일정 <span class="nav-group-sub">사무국이 돌리는 것</span></p>
-        <a class="nav-link" href="#ops">🔄 회차별 운영 10단계</a>
+        <button class="nav-item active" data-view="all">📋 전체</button>
+        <button class="nav-item" data-view="dev">🛠️ 신규 기능 구현 일정</button>
+        <button class="nav-item" data-view="ops">🎪 페어 운영 일정</button>
       </nav>
-      <div class="border-t border-slate-100 mt-2 pt-2 px-1">
-        <button id="modeBtn" class="w-full text-[11px] font-bold text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg py-2 transition">🖨️ 전체 보기 (인쇄용)</button>
-      </div>
     </div>
   </aside>
 
@@ -1353,69 +1330,35 @@ function buildMonth(cfg){
 
 document.getElementById('calRoot').innerHTML = months.map(buildMonth).join('');
 
-// ===================== 사이드 메뉴 · 탭 방식 화면 전환 =====================
-const links = Array.from(document.querySelectorAll('#sideNav a'));
-const VIEW_IDS = ['milestones','summary','timeline','calendar','ops','planning','decisions','tasks'];
-let mode = 'tab';           // 'tab' = 한 번에 한 화면 | 'all' = 전체 스크롤(인쇄용)
-let current = 'timeline'; // 현재 보고 있는 화면 (첫 화면: 월별 일정표)
+// ===================== 사이드 메뉴 · 전체 / 신규 기능 / 페어 운영 =====================
+// 섹션을 세 갈래로만 나눈다. risk(지금 막힌 것)는 어느 화면에서든 항상 맨 위에 보인다.
+const VIEW_SECTIONS = {
+  dev: ['milestones','summary','timeline','calendar','planning','decisions','tasks'],
+  ops: ['ops'],
+};
+const ALL_SECTIONS = [...VIEW_SECTIONS.dev, ...VIEW_SECTIONS.ops];
 
-function sectionOf(id){ return id.startsWith('cal-') ? 'calendar' : id; }
+const navItems = Array.from(document.querySelectorAll('#sideNav .nav-item'));
+let view = 'all'; // 'all' | 'dev' | 'ops'
 
 function applyView(){
-  const isAll = mode === 'all';
-  VIEW_IDS.forEach(id=>{
+  const shown = (view === 'all') ? ALL_SECTIONS : VIEW_SECTIONS[view];
+  ALL_SECTIONS.forEach(id=>{
     const el = document.getElementById(id);
-    if (el) el.style.display = (isAll || id === sectionOf(current)) ? '' : 'none';
+    if (el) el.style.display = shown.includes(id) ? '' : 'none';
   });
-  // 캘린더는 선택한 달만 표시 (전체 보기에서는 모두 표시)
-  document.querySelectorAll('#calRoot > div').forEach(el=>{
-    el.style.display = (isAll || !current.startsWith('cal-') || el.id === current) ? '' : 'none';
-  });
-  links.forEach(a=>{
-    const href = a.getAttribute('href');
-    a.classList.toggle('active', href === '#'+current || (current.startsWith('cal-') && href === '#calendar'));
-  });
-  const btn = document.getElementById('modeBtn');
-  if (btn) btn.textContent = isAll ? '📑 탭 보기로 돌아가기' : '🖨️ 전체 보기 (인쇄용)';
+  // 캘린더는 항상 12개월 전부 표시
+  document.querySelectorAll('#calRoot > div').forEach(el=>{ el.style.display = ''; });
+  navItems.forEach(b=> b.classList.toggle('active', b.dataset.view === view));
 }
 
-// 항상 상단에 고정 노출되는 섹션 (탭 전환 대상이 아님)
-const PINNED_IDS = ['risk'];
-
-links.forEach(a=>a.addEventListener('click', e=>{
-  const id = a.getAttribute('href').slice(1);
-  if (PINNED_IDS.includes(id)) {
-    // 고정 섹션은 화면 전환 없이 위로 스크롤만
-    e.preventDefault();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    return;
-  }
-  if (mode === 'tab') {
-    e.preventDefault();
-    current = (id === 'calendar') ? 'cal-7' : id;
-    applyView();
-    window.scrollTo({ top: 0 });
-  }
-}));
-
-document.getElementById('modeBtn').addEventListener('click', ()=>{
-  mode = (mode === 'tab') ? 'all' : 'tab';
+navItems.forEach(b=>b.addEventListener('click', ()=>{
+  view = b.dataset.view;
   applyView();
   window.scrollTo({ top: 0 });
-});
+}));
 
-// 전체 보기 모드에서만: 스크롤 위치에 따라 메뉴 강조
-const io = new IntersectionObserver((entries)=>{
-  if (mode !== 'all') return;
-  const visible = entries.filter(e=>e.isIntersecting).sort((a,b)=>a.boundingClientRect.top-b.boundingClientRect.top);
-  if (visible.length) {
-    current = visible[0].target.id;
-    links.forEach(a=>a.classList.toggle('active', a.getAttribute('href') === '#'+current));
-  }
-},{ rootMargin:'-10% 0px -70% 0px', threshold:0 });
-VIEW_IDS.forEach(id=>{ const el=document.getElementById(id); if(el) io.observe(el); });
-
-applyView(); // 첫 화면: 월별 일정표
+applyView(); // 첫 화면: 전체
 
 // ===================== 어드민/홈페이지 보기 토글 =====================
 let scope = 'all'; // 'all' | 'admin' | 'home'
