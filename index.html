@@ -6,7 +6,7 @@
 <title>OCREO 일정 한눈에</title>
 <!--
   디자인 시스템: ~/ocreo/DESIGN.md ("OCREO Status") — 블랙 + 블루 2색, 주황은 임박 신호에만.
-  일정 데이터는 아래 스크립트의 BASE_DATE · UPCOMING · MONTHS 를 고치면 됩니다.
+  일정 데이터는 아래 스크립트의 UPCOMING · MONTHS · STATUS · FAIRS 를 고치면 됩니다. 오늘 날짜와 D-day는 접속한 날 기준으로 자동 계산.
   <section id="briefing"> 은 일요일 자동 갱신(scripts/collect.py)이 찾는 자리이므로 id 를 바꾸지 마세요.
 -->
 <link href="https://cdn.jsdelivr.net/gh/moonspam/NanumSquare@2.0/nanumsquare.css" rel="stylesheet">
@@ -50,7 +50,7 @@
   .headline em { font-style: normal; color: #93C5FD; }
 
   /* 다가오는 날짜 */
-  .dates { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
+  .dates { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
   .date {
     border: 1px solid var(--line); border-radius: 14px; padding: 14px; background: #fff;
     display: flex; flex-direction: column; gap: 4px; min-height: 132px;
@@ -75,13 +75,18 @@
   .k-plan { background: #fff; border: 2px solid var(--navy); }
   .k-ops { background: var(--muted); }
 
+  .k-ref { background: #fff; border: 2px dashed var(--muted); }
+  .date.ref { border: 1px dashed #CBD5E1; background: #F8FAFC; }
+  .date.ref .dday { color: var(--sub); }
+  .month li.ref .t { color: var(--sub); }
+  .ask-ops li::before { background: var(--sub); }
   /* 월별 */
   .months { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
   .month { border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
   .month-head { background: var(--bg); padding: 10px 16px; font-weight: 800; color: var(--ink); font-size: 16px; display: flex; justify-content: space-between; align-items: center; }
   .month-head .now { font-size: 12px; font-weight: 800; color: #fff; background: var(--blue); border-radius: 999px; padding: 2px 10px; }
   .month ul { list-style: none; margin: 0; padding: 6px 16px 12px; }
-  .month li { display: grid; grid-template-columns: 74px minmax(0,1fr); gap: 8px; padding: 9px 0; border-bottom: 1px solid #F1F5F9; align-items: start; }
+  .month li { display: grid; grid-template-columns: 96px minmax(0,1fr); gap: 8px; padding: 9px 0; border-bottom: 1px solid #F1F5F9; align-items: start; }
   .month li:last-child { border-bottom: 0; }
   .month .d { font-size: 13px; font-weight: 800; color: var(--ink); white-space: nowrap; display: flex; align-items: center; gap: 6px; }
   .month .t { font-size: 14px; color: var(--text); line-height: 1.45; }
@@ -168,7 +173,7 @@
   <div class="top">
     <div>
       <h1>OCREO 일정 한눈에</h1>
-      <div class="base">실장님 보고용 · <b>2026년 10월 12일 (월) 기준</b> · 정리: 지니</div>
+      <div class="base">실장님 보고용 · 오늘 <b id="todayLabel">2026년 10월 12일 (월)</b> · 내용 업데이트 10/12 · 정리: 지니</div>
     </div>
   </div>
 
@@ -191,6 +196,7 @@
       <span><i class="dot k-dev"></i>개발·공개</span>
       <span><i class="dot k-plan"></i>기획</span>
       <span><i class="dot k-ops"></i>사무국 운영</span>
+      <span><i class="dot k-ref"></i>참고</span>
     </div>
     <div class="months" id="monthGrid"></div>
   </section>
@@ -202,10 +208,11 @@
       <div>
         <p class="sub-title">이번 주 할 일</p>
         <ul class="list">
-          <li><b>토스 결제 수정 17건 마무리</b> → 다시 확인 <span style="color:#64748B">— 공개는 10/25(일)로 변경</span></li>
-          <li>결제 알림(알림톡·메일) 없이 열지 결정 <span style="color:#64748B">— 실장님 확인</span></li>
+          <li><b>토스 결제 수정 17건 마무리</b> → 다시 확인 <span style="color:#64748B">— 공개는 10/25(일)</span></li>
+          <li>결제 알림(알림톡) 없이 열지 결정</li>
           <li>타이페이 행사(10/23~26) 준비 마무리</li>
-          <li>세금계산서 입력 폼 기획 시작</li>
+          <li><b>세금계산서 입력 폼 기획 시작</b> <span style="color:#64748B">— 10월 말 전 완료</span></li>
+          <li>부일페 V.7 부스도면 작업 <span style="color:#64748B">— Colin · 마감일 사무국 확인</span></li>
         </ul>
       </div>
       <div>
@@ -220,14 +227,21 @@
     </div>
   </section>
 
-  <!-- 4. 결정 필요 -->
+  <!-- 4. 결정·확인 필요 -->
   <section class="card" id="decisions">
-    <h2>실장님 결정이 필요합니다</h2>
+    <h2>기획 결정이 필요합니다</h2>
     <ol class="ask">
-      <li class="first"><b>결제 알림 없이 10/25에 토스를 열어도 될까요?</b>
-        <span class="why">입금 기한 당일 안내·만료 안내 같은 알림이 아직 개발 전입니다. 먼저 열고 사무국이 개별 안내로 메우거나, 알림까지 붙인 뒤 열 수 있습니다.</span></li>
+      <li class="first"><b>결제 알림(알림톡) 없이 10/25에 토스를 열지</b>
+        <span class="why">입금 기한 당일 안내·만료 안내 알림톡이 아직 개발 전입니다. 먼저 열고 사무국이 개별 안내로 메우거나, 알림톡까지 붙인 뒤 열 수 있습니다. 결제 안내 메일은 토스가 보내므로 우리는 보내지 않습니다.</span></li>
+      <li><b>부대시설 신청 후 결제 수단 — 토스 가상계좌 vs 퀵계좌이체</b>
+        <span class="why">12월 부대시설 기능에 어느 쪽을 붙일지 기획 검토가 필요합니다.</span></li>
       <li><b>첫 화면 개선 기획 회의 일정</b>
         <span class="why">9월에 하기로 했으나 아직 잡히지 않았습니다. 11~12월 개편을 하려면 10월 안에 방향이 필요합니다.</span></li>
+    </ol>
+    <p class="sub-title" style="margin-top:18px">사무국 확인이 필요합니다</p>
+    <ol class="ask ask-ops">
+      <li><b>부일페 V.7 부스도면은 언제까지 나와야 하나요?</b>
+        <span class="why">부스도면이 나와 Colin이 작업 중입니다. 마감일을 알아야 일정을 맞출 수 있습니다.</span></li>
     </ol>
   </section>
 
@@ -243,48 +257,48 @@
     <div class="fairs" id="fairGrid"></div>
   </section>
 
-  <footer>2026년 10월 12일 기준 · 개발팀 업무기록과 10/11 협의 내용을 바탕으로 정리했습니다.</footer>
+  <footer>내용은 2026년 10월 12일에 업데이트했습니다. 날짜와 D-day는 접속한 날을 기준으로 계산됩니다.</footer>
 </div>
 
 <script>
-// ===== 기준일 =====
-const BASE_DATE = '2026-10-12';
-
 // ===== 다가오는 주요 날짜 =====
-// kind: urgent(임박) · event(행사) · plain
+// kind: urgent(임박) · event(행사) · ref(참고) · plain
 const UPCOMING = [
   { from:'2026-10-23', to:'2026-10-26', label:'10/23 ~ 10/26', what:'타이페이 행사', note:'4일간', kind:'event' },
-  { from:'2026-10-25', label:'10/25 (일)',        what:'토스 결제 공개',         note:'신규 페어 확정자 대상', kind:'urgent' },
-  { from:'2026-11-06', to:'2026-11-08', label:'11/6 ~ 11/8',   what:'부일페 V.7 행사', note:'부대시설은 수기', kind:'event' },
-  { from:'2026-11-15', label:'11/15 (일) 전',     what:'세금계산서 입력 폼 기획',  note:'짧게 끝날 것으로 예상', kind:'plain' },
-  { from:'2026-12-10', label:'12/10 (목) 쯤',     what:'부대시설 본격 접수',    note:'22회차 · 수기', kind:'plain' },
+  { from:'2026-10-25', label:'10/25 (일)',      what:'토스 결제 공개',           note:'신규 페어 확정자 대상', kind:'urgent' },
+  { from:'2026-10-31', label:'10월 말 전',      what:'세금계산서 입력 폼 기획',   note:'증빙발행 기획 완료', kind:'plain' },
+  { from:'2026-11-06', to:'2026-11-08', label:'11/6 ~ 11/8', what:'부일페 V.7 행사', note:'부대시설은 수기', kind:'event' },
+  { from:'2026-11-14', label:'11/14 (토) 전',   what:'증빙발행 개발 완료',       note:'목표', kind:'plain' },
+  { from:'2026-11-15', to:'2026-12-05', label:'11/15 ~ 12/5', what:'지니 부재', note:'참고 일정', kind:'ref' },
+  { from:'2026-12-10', label:'12/10 (목) 쯤',   what:'부대시설 본격 접수',       note:'22회차 · 수기', kind:'plain' },
   { from:'2026-12-24', to:'2026-12-27', label:'12/24 ~ 12/27', what:'서일페 22회차 행사', note:'정산은 수기 · 증빙은 시스템 발행 (예상)', kind:'event' },
 ];
 
 // ===== 월별 일정 =====
-// k: event · dev · plan · ops   /  u: 임박 강조
+// at: 정렬·오늘 표시용 날짜 (그 날짜 이후 항목 앞에 「오늘」 줄이 들어감)
+// k: event · dev · plan · ops · ref   /  u: 임박 강조  /  done: 완료
 const MONTHS = [
   { y:2026, m:10, items:[
-    { d:'9월 초',   k:'dev',  t:'서일페 23회차 · 고일페 V.1 <b>참가신청 오픈</b>', done:true },
-    { d:'10/6',     k:'dev',  t:'토스 결제 개발서버 반영', done:true },
-    { d:'10/11',    k:'plan', t:'토스 검수 → 수정 17건 요청 · 어드민 협의', done:true },
-    { d:'10/12',    k:'today',t:'오늘' },
-    { d:'10/23~26', k:'event',t:'<b>타이페이 행사</b>' },
-    { d:'10/25 일', k:'dev',  t:'<b>토스 결제 공개</b>', u:true },
-    { d:'10월 중',  k:'plan', t:'해외 참가자 입금 방법 보완 (입금자명 규칙 등)' },
-    { d:'10월 중',  k:'plan', t:'세금계산서 입력 폼 기획 시작' },
+    { at:'2026-10-01', d:'9월 초',   k:'dev',  t:'서일페 23회차 · 고일페 V.1 <b>참가신청 오픈</b>', done:true },
+    { at:'2026-10-06', d:'10/6',     k:'dev',  t:'토스 결제 개발서버 반영', done:true },
+    { at:'2026-10-11', d:'10/11',    k:'plan', t:'토스 검수 → 수정 17건 요청 · 어드민 협의', done:true },
+    { at:'2026-10-13', d:'10월 중',  k:'ops',  t:'부일페 V.7 부스도면 작업 (Colin) · 마감일 사무국 확인 필요' },
+    { at:'2026-10-14', d:'10월 중',  k:'plan', t:'해외 참가자 입금 방법 보완 (입금자명 규칙 등)' },
+    { at:'2026-10-23', d:'10/23~26', k:'event',t:'<b>타이페이 행사</b>' },
+    { at:'2026-10-25', d:'10/25 일', k:'dev',  t:'<b>토스 결제 공개</b>', u:true },
+    { at:'2026-10-31', d:'10월 말 전', k:'plan', t:'<b>세금계산서 입력 폼 기획 완료</b> → 개발팀 전달' },
   ]},
   { y:2026, m:11, items:[
-    { d:'11/6~8',   k:'event',t:'<b>부일페 V.7 행사</b> — 부대시설은 수기' },
-    { d:'11/15 전', k:'plan', t:'<b>세금계산서 입력 폼 기획 완료</b> → 개발팀 전달' },
-    { d:'11월 중',  k:'dev',  t:'세금계산서 입력 폼 개발 → 22회차에 적용 (예상)' },
-    { d:'11월 중',  k:'plan', t:'첫 화면 2차 개편 기획·디자인 (기획 회의가 먼저 필요)' },
+    { at:'2026-11-06', d:'11/6~8',    k:'event',t:'<b>부일페 V.7 행사</b> — 부대시설은 수기' },
+    { at:'2026-11-14', d:'11/14 전',  k:'dev',  t:'<b>증빙발행 개발 완료</b> (목표) → 22회차에 적용' },
+    { at:'2026-11-15', d:'11/15~12/5',k:'ref',  t:'지니 부재 (참고)' },
+    { at:'2026-11-20', d:'11월 중',   k:'plan', t:'첫 화면 2차 개편 기획·디자인 (기획 회의가 먼저 필요)' },
   ]},
   { y:2026, m:12, items:[
-    { d:'12월',     k:'dev',  t:'<b>어드민 개발</b> — 정산·부대시설, 수기 건 나중에 등록하는 기능 포함' },
-    { d:'12/10쯤',  k:'ops',  t:'<b>부대시설 본격 접수</b> (22회차, 수기)' },
-    { d:'12/24~27', k:'event',t:'<b>서일페 22회차 행사</b>' },
-    { d:'행사 후',  k:'ops',  t:'22회차 증빙발행 (시스템 예상) · 정산 (수기)' },
+    { at:'2026-12-01', d:'12월',     k:'dev',  t:'<b>어드민 개발</b> — 정산·부대시설, 수기 건 나중에 등록하는 기능 포함' },
+    { at:'2026-12-10', d:'12/10쯤',  k:'ops',  t:'<b>부대시설 본격 접수</b> (22회차, 수기)' },
+    { at:'2026-12-24', d:'12/24~27', k:'event',t:'<b>서일페 22회차 행사</b>' },
+    { at:'2026-12-28', d:'행사 후',  k:'ops',  t:'22회차 증빙발행 (시스템 예상) · 정산 (수기)' },
   ]},
 ];
 
@@ -293,9 +307,10 @@ const MONTHS = [
 const STATUS = [
   { name:'토스 결제 (가상계좌)',             s:'doing',  label:'마무리 중', next:'수정 17건 → <b>10/25(일) 공개</b>' },
   { name:'신규 페어 참가신청',               s:'done',   label:'완료',     next:'서일페 23회차 · 고일페 V.1 9월 초 오픈 · 지금은 신청·검수 중' },
-  { name:'결제 알림 (알림톡·메일)',          s:'wait',   label:'개발 전',  next:'기획 완료 · 10/25 공개에 넣을지 결정 필요' },
-  { name:'증빙발행 (현금영수증·세금계산서)', s:'wait',   label:'기획',     next:'현금영수증은 참가자가 토스 결제 때 직접 발행 · 세금계산서는 입력 폼 기획 → 개발 · 22회차도 시스템 발행 가능할 것으로 예상' },
-  { name:'부대시설 신청',                   s:'manual', label:'수기 운영', next:'22회차 수기 접수 중 · 12/10쯤 본격 접수 · 12월 개발' },
+  { name:'결제 알림 (알림톡)',               s:'wait',   label:'개발 전',  next:'기획 완료 · 10/25 공개에 넣을지 결정 필요 · 안내 메일은 토스가 보냄' },
+  { name:'증빙발행 (현금영수증·세금계산서)', s:'wait',   label:'기획',     next:'현금영수증은 참가자가 토스 결제 때 직접 발행 · 세금계산서 입력 폼 <b>10월 말 기획 → 11/14 개발 완료</b> 목표 · 22회차도 시스템 발행 예상' },
+  { name:'부일페 V.7 부스도면',             s:'doing',  label:'작업 중',  next:'Colin 작업 중 · 언제까지 나와야 하는지 사무국 확인 필요' },
+  { name:'부대시설 신청',                   s:'manual', label:'수기 운영', next:'22회차 수기 접수 중 · 12/10쯤 본격 접수 · 12월 개발 · 결제 수단(가상계좌 vs 퀵계좌이체) 기획 검토 필요' },
   { name:'정산 관리',                       s:'manual', label:'수기 운영', next:'22회차까지 수기 · 12월에 가능한 만큼 개발' },
   { name:'해외 참가자 입금',                 s:'wait',   label:'기획',     next:'페이팔은 하지 않음 · 입금자명 규칙 등 안내 보완' },
   { name:'타이페이 행사 준비',               s:'wait',   label:'확인 필요', next:'10/23~26 행사 · 참가자 명단 · 중국어 도면' },
@@ -306,34 +321,46 @@ const STATUS = [
 // ===== 페어별 지금 단계 (10단계 중) =====
 const STEP_NAMES = ['신청·검수','확정·입금','갤러리등록','잔금','부스배정','키트발송','부대시설','현장매뉴얼','증빙발행','결과보고'];
 const FAIRS = [
-  { name:'부일페 V.7',    date:'2026.11.6 ~ 11.8',  cur:6, now:'키트발송·도면',   next:'부대시설 → 행사',      pay:'입금·부대시설: 수기' },
+  { name:'부일페 V.7',    date:'2026.11.6 ~ 11.8',  cur:6, now:'키트발송·부스도면', next:'부대시설 → 행사',      pay:'입금·부대시설: 수기 · 부스도면 Colin 작업 중' },
   { name:'서일페 22회차', date:'2026.12.24 ~ 12.27', cur:5, now:'부스배정',       next:'키트발송 → 부대시설',  pay:'부대시설·정산: 수기 · 증빙: 시스템 (예상)' },
   { name:'서일페 23회차', date:'2027년 여름',        cur:2, now:'확정·입금',      next:'갤러리등록',           pay:'계약금·잔금: 토스 (10/25~)' },
   { name:'고일페 V.1',    date:'2027.3.12 ~',        cur:2, now:'확정·입금',      next:'갤러리등록 → 잔금',     pay:'계약금·잔금: 토스 (10/25~)' },
 ];
 
-// ===== 그리기 =====
-const today = new Date(BASE_DATE + 'T00:00:00');
+// ===== 그리기 — 오늘 = 접속한 날 =====
+const now = new Date();
+const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+const pad = (n) => String(n).padStart(2, '0');
+const todayISO = `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`;
+const WD = ['일','월','화','수','목','금','토'];
+document.getElementById('todayLabel').textContent =
+  `${today.getFullYear()}년 ${today.getMonth() + 1}월 ${today.getDate()}일 (${WD[today.getDay()]})`;
 const dayDiff = (iso) => Math.round((new Date(iso + 'T00:00:00') - today) / 86400000);
 
 document.getElementById('dates').innerHTML = UPCOMING.map(x => {
   const a = dayDiff(x.from), b = dayDiff(x.to || x.from);
   let dd = a > 0 ? 'D-' + a : (b >= 0 ? '진행 중' : '지남');
   if (a === 0) dd = 'D-DAY';
-  const cls = ['date', x.kind === 'urgent' ? 'urgent' : x.kind === 'event' ? 'event' : '', b < 0 ? 'past' : ''].join(' ');
+  const cls = ['date', x.kind === 'urgent' ? 'urgent' : x.kind === 'event' ? 'event' : x.kind === 'ref' ? 'ref' : '', b < 0 ? 'past' : ''].join(' ');
   return `<div class="${cls}"><div class="dday">${dd}</div><div class="when">${x.label}</div><div class="what">${x.what}</div><div class="note">${x.note}</div></div>`;
 }).join('');
 
-const dotCls = { event:'k-event', dev:'k-dev', plan:'k-plan', ops:'k-ops' };
-const curMonth = today.getMonth() + 1;
-document.getElementById('monthGrid').innerHTML = MONTHS.map(mo => `
+const dotCls = { event:'k-event', dev:'k-dev', plan:'k-plan', ops:'k-ops', ref:'k-ref' };
+const todayRow = `<li class="today"><span class="d">${today.getMonth() + 1}/${today.getDate()}</span><span class="t">◀ 오늘</span></li>`;
+document.getElementById('monthGrid').innerHTML = MONTHS.map(mo => {
+  const isCur = mo.y === today.getFullYear() && mo.m === today.getMonth() + 1;
+  let rows = '', placed = !isCur;
+  mo.items.forEach(it => {
+    if (!placed && it.at > todayISO) { rows += todayRow; placed = true; }
+    rows += `<li class="${it.done ? 'done' : ''} ${it.u ? 'is-urgent' : ''} ${it.k === 'ref' ? 'ref' : ''}"><span class="d"><i class="dot ${dotCls[it.k]}"></i>${it.d}</span><span class="t">${it.done ? '✓ ' : ''}${it.t}</span></li>`;
+  });
+  if (!placed) rows += todayRow;
+  return `
   <div class="month">
-    <div class="month-head">${mo.m}월${mo.m === curMonth ? '<span class="now">이번 달</span>' : ''}</div>
-    <ul>${mo.items.map(it => it.k === 'today'
-      ? `<li class="today"><span class="d">${it.d}</span><span class="t">◀ 오늘</span></li>`
-      : `<li class="${it.done ? 'done' : ''} ${it.u ? 'is-urgent' : ''}"><span class="d"><i class="dot ${dotCls[it.k]}"></i>${it.d}</span><span class="t">${it.done ? '✓ ' : ''}${it.t}</span></li>`
-    ).join('')}</ul>
-  </div>`).join('');
+    <div class="month-head">${mo.m}월${isCur ? '<span class="now">이번 달</span>' : ''}</div>
+    <ul>${rows}</ul>
+  </div>`;
+}).join('');
 
 const pillCls = { done:'p-done', doing:'p-doing', manual:'p-manual', wait:'p-wait', late:'p-late', hold:'p-hold' };
 document.getElementById('statusList').innerHTML = STATUS.map(x => `
