@@ -50,7 +50,18 @@
   .headline em { font-style: normal; color: #93C5FD; }
 
   /* 다가오는 날짜 */
-  .dates { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .dates { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; flex: 1; min-width: 0; }
+  .carousel { display: flex; align-items: center; gap: 10px; }
+  .nav-btn {
+    width: 38px; height: 38px; flex-shrink: 0; border-radius: 50%; border: 1px solid var(--line);
+    background: #fff; color: var(--ink); font-size: 20px; font-weight: 800; line-height: 1; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; transition: background .15s, color .15s;
+  }
+  .nav-btn:hover:not(:disabled) { background: var(--blue-soft); color: var(--blue); border-color: #BFDBFE; }
+  .nav-btn:disabled { opacity: .3; cursor: default; }
+  .dots { display: flex; justify-content: center; gap: 8px; margin-top: 14px; }
+  .dots button { width: 8px; height: 8px; border-radius: 999px; border: 0; padding: 0; background: #CBD5E1; cursor: pointer; transition: width .2s, background .2s; }
+  .dots button.on { width: 22px; background: var(--blue); }
   .date {
     border: 1px solid var(--line); border-radius: 14px; padding: 14px; background: #fff;
     display: flex; flex-direction: column; gap: 4px; min-height: 132px;
@@ -147,7 +158,6 @@
   footer { text-align: center; font-size: 13px; color: var(--muted); margin-top: 8px; }
 
   @media (max-width: 960px) {
-    .dates { grid-template-columns: repeat(3, 1fr); }
     .fairs { grid-template-columns: repeat(2, 1fr); }
   }
   @media (max-width: 760px) {
@@ -158,7 +168,7 @@
   @media (max-width: 520px) {
     h1 { font-size: 24px; }
     .card { padding: 18px; }
-    .dates { grid-template-columns: repeat(2, 1fr); }
+    .dates { grid-template-columns: 1fr; }
     .fairs { grid-template-columns: 1fr; }
   }
   @media print {
@@ -185,7 +195,12 @@
   <!-- 1. 다가오는 날짜 -->
   <section class="card" id="upcoming">
     <h2>다가오는 주요 날짜</h2>
-    <div class="dates" id="dates"></div>
+    <div class="carousel">
+      <button class="nav-btn" id="datePrev" aria-label="이전 날짜">‹</button>
+      <div class="dates" id="dates"></div>
+      <button class="nav-btn" id="dateNext" aria-label="다음 날짜">›</button>
+    </div>
+    <div class="dots" id="dateDots"></div>
   </section>
 
   <!-- 2. 월별 일정 -->
@@ -338,13 +353,36 @@ document.getElementById('todayLabel').textContent =
   `${today.getFullYear()}년 ${today.getMonth() + 1}월 ${today.getDate()}일 (${WD[today.getDay()]})`;
 const dayDiff = (iso) => Math.round((new Date(iso + 'T00:00:00') - today) / 86400000);
 
-document.getElementById('dates').innerHTML = UPCOMING.map(x => {
+// 다가오는 날짜: 한 번에 3장(좁은 화면 1장), 좌우 버튼·점으로 넘김. 처음엔 아직 지나지 않은 첫 날짜부터.
+const dateCards = UPCOMING.map(x => {
   const a = dayDiff(x.from), b = dayDiff(x.to || x.from);
   let dd = a > 0 ? 'D-' + a : (b >= 0 ? '진행 중' : '지남');
   if (a === 0) dd = 'D-DAY';
   const cls = ['date', x.kind === 'urgent' ? 'urgent' : x.kind === 'event' ? 'event' : x.kind === 'ref' ? 'ref' : '', b < 0 ? 'past' : ''].join(' ');
-  return `<div class="${cls}"><div class="dday">${dd}</div><div class="when">${x.label}</div><div class="what">${x.what}</div><div class="note">${x.note}</div></div>`;
-}).join('');
+  return { past: b < 0, html: `<div class="${cls}"><div class="dday">${dd}</div><div class="when">${x.label}</div><div class="what">${x.what}</div><div class="note">${x.note}</div></div>` };
+});
+const firstUpcoming = Math.max(0, dateCards.findIndex(c => !c.past));
+let perView = 3, dateStart = firstUpcoming;
+function renderDates() {
+  perView = window.innerWidth <= 520 ? 1 : 3;
+  const maxStart = Math.max(0, dateCards.length - perView);
+  dateStart = Math.min(Math.max(0, dateStart), maxStart);
+  document.getElementById('dates').innerHTML = dateCards.slice(dateStart, dateStart + perView).map(c => c.html).join('');
+  document.getElementById('datePrev').disabled = dateStart === 0;
+  document.getElementById('dateNext').disabled = dateStart >= maxStart;
+  const pages = Math.ceil(dateCards.length / perView);
+  const curPage = dateStart >= maxStart ? pages - 1 : Math.floor(dateStart / perView);
+  document.getElementById('dateDots').innerHTML = Array.from({ length: pages }, (_, p) =>
+    `<button class="${p === curPage ? 'on' : ''}" data-p="${p}" aria-label="${p + 1}번째 묶음"></button>`).join('');
+}
+document.getElementById('datePrev').onclick = () => { dateStart -= perView; renderDates(); };
+document.getElementById('dateNext').onclick = () => { dateStart += perView; renderDates(); };
+document.getElementById('dateDots').onclick = (e) => {
+  const p = e.target.dataset && e.target.dataset.p;
+  if (p !== undefined) { dateStart = Number(p) * perView; renderDates(); }
+};
+window.addEventListener('resize', renderDates);
+renderDates();
 
 const dotCls = { event:'k-event', dev:'k-dev', plan:'k-plan', ops:'k-ops', ref:'k-ref' };
 const todayRow = `<li class="today"><span class="d">${today.getMonth() + 1}/${today.getDate()}</span><span class="t">◀ 오늘</span></li>`;
